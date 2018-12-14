@@ -9,4 +9,10 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Grpc.Core">
+      <HintPath>C:\Users\OWEN\.nuget\packages\grpc.core\1.17.0\lib\netstandard1.5\Grpc.Core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
