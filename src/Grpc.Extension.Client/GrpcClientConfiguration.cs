@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Grpc.Extension.Client
 {
 	public class GrpcClientConfiguration
 	{
+		public TimeSpan ChannelStatusCheckInterval { get; set; } = TimeSpan.FromSeconds(15);
 
-		internal List<string> GrpcServiceName { get; set; }
+		internal Type GrpcLoadBalancing { get; set; } = typeof(GrpcLoadBalancing);
+
+		internal List<string> GrpcServiceName { get; set; } = new List<string>();
 	}
 }

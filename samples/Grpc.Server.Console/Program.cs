@@ -15,8 +15,8 @@ namespace Grpc.Server.Console
 		static async Task Main(string[] args)
 		{
 
-			var c = ChannelFactory.GetService("grpc-server1");
-			System.Console.WriteLine(JsonConvert.SerializeObject(c));
+			//var c = ChannelFactory.GetService("grpc-server1");
+			//System.Console.WriteLine(JsonConvert.SerializeObject(c));
 			System.Console.ReadKey();
 			//var host = new HostBuilder().ConfigureAppConfiguration((hostingContext, config) =>
 			//	{

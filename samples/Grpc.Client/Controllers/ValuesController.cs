@@ -12,6 +12,15 @@ namespace Grpc.Client.Controllers
 	[ApiController]
 	public class ValuesController : ControllerBase
 	{
+		public ChannelFactory ChannelFactory { get; }
+
+
+
+		public ValuesController(ChannelFactory channelFactory)
+		{
+			ChannelFactory = channelFactory;
+		}
+
 		// GET api/values
 		[HttpGet]
 		public IActionResult Get()
@@ -24,7 +33,7 @@ namespace Grpc.Client.Controllers
 				{
 					Name = "Owen"
 				}),
-				services = ChannelFactory.GetService("grpc-server1")
+				services = ChannelFactory.GetChannels("grpc-server1")
 			});
 		}
 

@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Grpc.Core;
 
 namespace Grpc.Extension.Client
 {
 	public interface IGrpcLoadBalancing
 	{
-		ServiceEndPoint GetService(string serviceName);
+		Channel GetService(string serviceName);
 	}
 }

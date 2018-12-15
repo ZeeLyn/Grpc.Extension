@@ -15,7 +15,7 @@ namespace Grpc.Server.WebApp.Controllers
 		[HttpGet]
 		public IActionResult Get()
 		{
-			return Ok(ChannelFactory.GetService("grpc-server1"));
+			return Ok();
 		}
 
 		// GET api/values/5
