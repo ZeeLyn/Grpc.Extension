@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -12,7 +11,7 @@ namespace Grpc.Extension.Client
 {
 	public class ChannelFactory
 	{
-		private Dictionary<string, List<ChannelEndPoint>> ServiceEndPoints { get; }
+		private Dictionary<string, List<ChannelEndPoint>> ServiceChannels { get; }
 
 		private GrpcClientConfiguration GrpcClientConfiguration { get; }
 
@@ -22,16 +21,19 @@ namespace Grpc.Extension.Client
 
 		public ChannelFactory(GrpcClientConfiguration gRpcClientConfiguration, ILogger<ChannelFactory> logger)
 		{
-			ServiceEndPoints = new Dictionary<string, List<ChannelEndPoint>>();
+			ServiceChannels = new Dictionary<string, List<ChannelEndPoint>>();
 			GrpcClientConfiguration = gRpcClientConfiguration;
 			Logger = logger;
 		}
 
 
-		public List<Channel> GetChannels(string serviceName)
+		public List<Channel> GetChannels(string serviceName, ChannelEndPointStatus status = ChannelEndPointStatus.Passing)
 		{
-			if (ServiceEndPoints.TryGetValue(serviceName, out var result))
-				return result.Select(p => p.Channel).ToList();
+			if (!GrpcClientConfiguration.ServicesConfiguration.Any(p =>
+				p.ServiceName.Equals(serviceName, StringComparison.CurrentCultureIgnoreCase)))
+				throw new InvalidOperationException($"Not found service {serviceName}");
+			if (ServiceChannels.TryGetValue(serviceName, out var result))
+				return result.FindAll(p => p.Status == status).Select(p => p.Channel).ToList();
 			return new List<Channel>();
 		}
 
@@ -44,54 +46,63 @@ namespace Grpc.Extension.Client
 				using (await _asyncLock.LockAsync(cancellationToken))
 				{
 					Logger.LogInformation("Get the lock,start refresh...");
-					foreach (var serviceName in GrpcClientConfiguration.GrpcServiceName)
+					foreach (var service in GrpcClientConfiguration.ServicesConfiguration)
 					{
-						var entries = await GetHealthService(serviceName);
-						if (!ServiceEndPoints.ContainsKey(serviceName))
-						{
-							ServiceEndPoints.Add(serviceName, entries.Select(p => new ChannelEndPoint
-							{
-								Address = p.Service.Address,
-								Port = p.Service.Port,
-								Channel = new Channel(p.Service.Address, p.Service.Port,
-									ChannelCredentials.Insecure),
-								Status = ChannelEndPointStatus.Passing
-							}).ToList());
-							continue;
-						}
+						if (cancellationToken.IsCancellationRequested)
+							break;
 
-						if (ServiceEndPoints.TryGetValue(serviceName, out var endPoints))
+						var healthEndPoints = (await GetHealthService(service.ServiceName, cancellationToken: cancellationToken));
+
+						if (cancellationToken.IsCancellationRequested)
+							break;
+
+						if (ServiceChannels.TryGetValue(service.ServiceName, out var channels))
 						{
-							var newEndPoints = entries.FindAll(p =>
-								!endPoints.Any(e => e.Address == p.Service.Address && e.Port == p.Service.Port));
-							if (newEndPoints.Any())
+							foreach (var channel in channels)
 							{
-								endPoints.AddRange(newEndPoints.Select(p => new ChannelEndPoint
+								if (cancellationToken.IsCancellationRequested)
+									break;
+								if (healthEndPoints.Any(p =>
+									channel.Address == p.Service.Address && channel.Port == p.Service.Port))
+								{
+									if (channel.Status == ChannelEndPointStatus.Passing) continue;
+									channel.Status = ChannelEndPointStatus.Passing;
+									Logger.LogInformation($"The status of node {channel.Address}:{channel.Port} changes to passing.");
+								}
+								else
+								{
+									if (channel.Status == ChannelEndPointStatus.Critical)
+										continue;
+									channel.Status = ChannelEndPointStatus.Critical;
+									Logger.LogInformation($"The status of node {channel.Address}:{channel.Port} changes to critical.");
+								}
+							}
+
+							var newEndPoints = healthEndPoints.FindAll(p =>
+								!channels.Any(e => e.Address == p.Service.Address && e.Port == p.Service.Port)).Select(p => new ChannelEndPoint
 								{
 									Address = p.Service.Address,
 									Port = p.Service.Port,
-									Channel = new Channel(p.Service.Address, p.Service.Port,
-										ChannelCredentials.Insecure),
+									Channel = new Channel(p.Service.Address, p.Service.Port, service.ChannelCredentials),
 									Status = ChannelEndPointStatus.Passing
-								}));
-							}
+								}).ToList();
 
-							foreach (var entry in newEndPoints)
+							if (newEndPoints.Any())
 							{
-								var endPoint = endPoints.FirstOrDefault(p =>
-									p.Address == entry.Service.Address && p.Port == entry.Service.Port);
-								if (endPoint == null)
-									endPoints.Add(new ChannelEndPoint
-									{
-										Address = entry.Service.Address,
-										Port = entry.Service.Port,
-										Channel = new Channel(entry.Service.Address, entry.Service.Port,
-											ChannelCredentials.Insecure),
-										Status = ChannelEndPointStatus.Passing
-									});
-								continue;
-
+								channels.AddRange(newEndPoints);
+								Logger.LogInformation($"New nodes added:{string.Join(",", newEndPoints.Select(p => p.Address + ":" + p.Port))}");
 							}
+						}
+						else
+						{
+							ServiceChannels.Add(service.ServiceName, healthEndPoints.Select(p => new ChannelEndPoint
+							{
+								Address = p.Service.Address,
+								Port = p.Service.Port,
+								Channel = new Channel(p.Service.Address, p.Service.Port, service.ChannelCredentials),
+								Status = ChannelEndPointStatus.Passing
+							}).ToList());
+							Logger.LogInformation($"Discover a new {service.ServiceName} service node.");
 						}
 					}
 				}
@@ -104,16 +115,31 @@ namespace Grpc.Extension.Client
 		}
 
 
-		internal async Task<List<ServiceEntry>> GetHealthService(string serviceId, string tag = "", bool passingOnly = true)
+		internal async Task<List<ServiceEntry>> GetHealthService(string serviceName, string tag = "", bool passingOnly = true, CancellationToken cancellationToken = default(CancellationToken))
 		{
-			using (var consul = new ConsulClient(config => { config.Address = new Uri("http://192.168.1.142:8500"); }))
+			using (var consul = new ConsulClient(conf =>
 			{
-				var result = await consul.Health.Service(serviceId, tag, passingOnly);
-				if (result.StatusCode != System.Net.HttpStatusCode.OK)
+				conf.Address = GrpcClientConfiguration.ConsulClientConfiguration.Address;
+				conf.Datacenter = GrpcClientConfiguration.ConsulClientConfiguration.Datacenter;
+				conf.Token = GrpcClientConfiguration.ConsulClientConfiguration.Token;
+				conf.WaitTime = GrpcClientConfiguration.ConsulClientConfiguration.WaitTime;
+			}))
+			{
+				try
 				{
-					Logger.LogError("Get the health service error:{0}", result.StatusCode);
+					var result = await consul.Health.Service(serviceName, tag, passingOnly, cancellationToken);
+					if (result.StatusCode != System.Net.HttpStatusCode.OK)
+					{
+						Logger.LogError("Get the health service error:{0}", result.StatusCode);
+					}
+
+					return result.Response.ToList();
 				}
-				return result.Response.ToList();
+				catch (Exception ex)
+				{
+					Logger.LogError("Get the health service error:{0}\n{1}", ex.Message, ex.StackTrace);
+					throw;
+				}
 			}
 		}
 	}

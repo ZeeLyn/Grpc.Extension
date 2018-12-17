@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Extension.Client;
+using Grpc.Extension.Client.LoadBalance;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Grpc.Client.Controllers
@@ -12,29 +13,31 @@ namespace Grpc.Client.Controllers
 	[ApiController]
 	public class ValuesController : ControllerBase
 	{
-		public ChannelFactory ChannelFactory { get; }
+		private ChannelFactory ChannelFactory { get; }
 
+		private GrpcLoadBalance GrpcLoadBalance { get; }
 
-
-		public ValuesController(ChannelFactory channelFactory)
+		public ValuesController(ChannelFactory channelFactory, GrpcLoadBalance grpcLoadBalance)
 		{
 			ChannelFactory = channelFactory;
+			GrpcLoadBalance = grpcLoadBalance;
 		}
 
 		// GET api/values
 		[HttpGet]
 		public IActionResult Get()
 		{
-			var channel = new Channel("192.168.1.129:50051", ChannelCredentials.Insecure);
-			var client = new Hello.HelloClient(channel);
-			return Ok(new
-			{
-				gRpc = client.SayHello(new HelloRequest
-				{
-					Name = "Owen"
-				}),
-				services = ChannelFactory.GetChannels("grpc-server1")
-			});
+			//var channel = new Channel("192.168.1.129:50051", ChannelCredentials.Insecure);
+			//var client = new Hello.HelloClient(channel);
+			//return Ok(new
+			//{
+			//	gRpc = client.SayHello(new HelloRequest
+			//	{
+			//		Name = "Owen"
+			//	}),
+			//	services = ChannelFactory.GetChannels("grpc-server1")
+			//});
+			return Ok(GrpcLoadBalance.GetService("grpc-server"));
 		}
 
 		// GET api/values/5

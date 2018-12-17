@@ -70,6 +70,9 @@ namespace Grpc.Extension.Server
 				using (var consul = new ConsulClient(conf =>
 				{
 					conf.Address = configure.ConsulClientConfiguration.Address;
+					conf.Datacenter = configure.ConsulClientConfiguration.Datacenter;
+					conf.Token = configure.ConsulClientConfiguration.Token;
+					conf.WaitTime = configure.ConsulClientConfiguration.WaitTime;
 				}))
 				{
 					var result = consul.Agent

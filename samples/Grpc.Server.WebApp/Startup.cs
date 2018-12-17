@@ -26,18 +26,20 @@ namespace Grpc.Server.WebApp
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 			services.AddGrpcServer(configure =>
 			{
-				configure.AddServerPort("192.168.1.129", 50051, ServerCredentials.Insecure);
+
+				configure.AddServerPort(Configuration.GetSection("GrpcServer:Host").Get<string>(), Configuration.GetSection("GrpcServer:Port").Get<int>(), ServerCredentials.Insecure);
 				configure.AddService(Hello.BindService(new HelloService()));
 				configure.AddConsul(agent =>
 					{
-						agent.Address = "192.168.1.129";
-						agent.Port = 50051;
-						agent.ServiceId = "grpc-server1";
-						agent.ServiceName = "grpc-server1";
-						agent.HealthCheck = ("192.168.1.129", 80);
+						agent.Address = Configuration.GetSection("GrpcServer:Host").Get<string>();
+						agent.Port = Configuration.GetSection("GrpcServer:Port").Get<int>();
+						agent.ServiceId = $"{Configuration.GetSection("GrpcServer:Host").Get<string>()}:{Configuration.GetSection("GrpcServer:Port").Get<int>()}";
+						agent.ServiceName = "grpc-server";
+						agent.HealthCheck = (Configuration.GetSection("GrpcServer:Host").Get<string>(), Configuration.GetSection("Port").Get<int>());
 					},
 					client => { client.Address = new Uri("http://192.168.1.142:8500"); });
 			});

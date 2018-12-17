@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Extension.Client;
@@ -14,6 +16,9 @@ namespace Grpc.Server.Console
 	{
 		static async Task Main(string[] args)
 		{
+			var list1 = new List<int> { 1, 3, 4 };
+			var list2 = new List<int> { 2, 5, 3 };
+			System.Console.WriteLine(JsonConvert.SerializeObject(list1.Except(list2)));
 
 			//var c = ChannelFactory.GetService("grpc-server1");
 			//System.Console.WriteLine(JsonConvert.SerializeObject(c));

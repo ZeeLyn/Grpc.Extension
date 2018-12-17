@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Grpc.Core;
 using Grpc.Extension.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -28,8 +29,11 @@ namespace Grpc.Client
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 			services.AddGrpcClient(options =>
 			{
-
-
+				options.AddConsul(
+					client => { client.Address = new Uri("http://192.168.1.142:8500"); },
+					new ServiceConfiguration("grpc-server", ChannelCredentials.Insecure)
+				);
+				options.ChannelStatusCheckInterval = TimeSpan.FromSeconds(15);
 			});
 		}
 

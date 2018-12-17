@@ -1,4 +1,5 @@
 ﻿using System;
+using Grpc.Extension.Client.LoadBalance;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Grpc.Extension.Client
@@ -10,7 +11,7 @@ namespace Grpc.Extension.Client
 			var conf = new GrpcClientConfiguration();
 
 			serviceCollection.AddSingleton<ChannelFactory>();
-			serviceCollection.AddSingleton(typeof(IGrpcLoadBalancing), conf.GrpcLoadBalancing);
+			serviceCollection.AddSingleton(typeof(GrpcLoadBalance), conf.GrpcLoadBalance);
 			//serviceCollection.AddSingleton(new );
 			configuration?.Invoke(conf);
 			serviceCollection.AddSingleton(conf);
