@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Extension.Client;
@@ -34,6 +35,7 @@ namespace Grpc.Client
 					new ServiceConfiguration("grpc-server", ChannelCredentials.Insecure)
 				);
 				options.ChannelStatusCheckInterval = TimeSpan.FromSeconds(15);
+				options.AddClient<Hello.HelloClient>();
 			});
 		}
 

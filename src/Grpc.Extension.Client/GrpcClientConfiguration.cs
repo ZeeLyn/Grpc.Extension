@@ -15,6 +15,8 @@ namespace Grpc.Extension.Client
 		internal ConsulClientConfiguration ConsulClientConfiguration { get; set; }
 
 		internal List<ServiceConfiguration> ServicesConfiguration { get; set; } = new List<ServiceConfiguration>();
+
+		internal List<Type> ClientTypes { get; set; } = new List<Type>();
 	}
 
 	public class ServiceConfiguration

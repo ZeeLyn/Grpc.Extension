@@ -1,5 +1,6 @@
 ﻿using System;
 using Consul;
+using Grpc.Core;
 using Grpc.Extension.Client.LoadBalance;
 
 namespace Grpc.Extension.Client
@@ -25,6 +26,20 @@ namespace Grpc.Extension.Client
 			gRpcClientConfiguration.ConsulClientConfiguration = new ConsulClientConfiguration();
 			action?.Invoke(gRpcClientConfiguration.ConsulClientConfiguration);
 			gRpcClientConfiguration.ServicesConfiguration.AddRange(serviceConfigurations);
+			return gRpcClientConfiguration;
+		}
+
+
+		public static GrpcClientConfiguration AddClient(this GrpcClientConfiguration gRpcClientConfiguration,
+			params Type[] types)
+		{
+			gRpcClientConfiguration.ClientTypes.AddRange(types);
+			return gRpcClientConfiguration;
+		}
+
+		public static GrpcClientConfiguration AddClient<T>(this GrpcClientConfiguration gRpcClientConfiguration) where T : ClientBase
+		{
+			gRpcClientConfiguration.ClientTypes.Add(typeof(T));
 			return gRpcClientConfiguration;
 		}
 	}

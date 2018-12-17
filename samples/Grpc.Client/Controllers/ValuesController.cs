@@ -17,10 +17,13 @@ namespace Grpc.Client.Controllers
 
 		private GrpcLoadBalance GrpcLoadBalance { get; }
 
-		public ValuesController(ChannelFactory channelFactory, GrpcLoadBalance grpcLoadBalance)
+		private ClientFactory ClientFactory { get; }
+
+		public ValuesController(ChannelFactory channelFactory, GrpcLoadBalance grpcLoadBalance, ClientFactory clientFactory)
 		{
 			ChannelFactory = channelFactory;
 			GrpcLoadBalance = grpcLoadBalance;
+			ClientFactory = clientFactory;
 		}
 
 		// GET api/values
@@ -37,7 +40,14 @@ namespace Grpc.Client.Controllers
 			//	}),
 			//	services = ChannelFactory.GetChannels("grpc-server1")
 			//});
-			return Ok(GrpcLoadBalance.GetService("grpc-server"));
+			var channel = GrpcLoadBalance.GetService("grpc-server");
+			var c = new Hello.HelloClient(channel);
+
+			var client = ClientFactory.Get<Hello.HelloClient>("grpc-server");
+			return Ok(client.SayHello(new HelloRequest
+			{
+				Name = "Owen"
+			}));
 		}
 
 		// GET api/values/5

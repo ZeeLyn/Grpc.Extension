@@ -40,6 +40,8 @@ namespace Grpc.Extension.Client
 				}
 			}, CancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
+
+
 			return app;
 		}
 	}

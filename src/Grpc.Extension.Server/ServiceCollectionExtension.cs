@@ -10,6 +10,7 @@ namespace Grpc.Extension.Server
 			var conf = new GrpcServerConfiguration();
 			configure?.Invoke(conf);
 			serviceCollection.AddSingleton(conf);
+			conf.Services.Add(Health.V1.Health.BindService(new HealthCheckService.HealthCheckService()));
 			return serviceCollection;
 		}
 	}

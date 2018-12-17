@@ -9,7 +9,6 @@ namespace Grpc.Extension.Server
 		public static GrpcServerConfiguration AddService(this GrpcServerConfiguration configure, params ServerServiceDefinition[] serverServiceDefinition)
 		{
 			configure.Services.AddRange(serverServiceDefinition);
-			configure.Services.Add(Health.V1.Health.BindService(new HealthCheckService.HealthCheckService()));
 			return configure;
 		}
 
