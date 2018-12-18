@@ -28,7 +28,6 @@ namespace Grpc.Server.WebApp
 		{
 
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-			services.AddSingleton<Hello.HelloBase, HelloService>();
 			services.AddGrpcServer(configure =>
 			{
 				configure.AddServerPort(Configuration.GetSection("GrpcServer:Host").Get<string>(), Configuration.GetSection("GrpcServer:Port").Get<int>(), ServerCredentials.Insecure);
