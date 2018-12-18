@@ -3,13 +3,13 @@ using Grpc.Core;
 
 namespace Grpc.Extension.Client.LoadBalance
 {
-	public class GrpcLoadBalanceRoundRobin : GrpcLoadBalance
+	public class GrpcLoadBalanceRound : GrpcLoadBalance
 	{
 		protected ChannelFactory ChannelFactory { get; }
 
 		private int _index = -1;
 
-		public GrpcLoadBalanceRoundRobin(ChannelFactory channelFactory)
+		public GrpcLoadBalanceRound(ChannelFactory channelFactory)
 		{
 			ChannelFactory = channelFactory;
 		}
@@ -20,12 +20,13 @@ namespace Grpc.Extension.Client.LoadBalance
 		{
 			lock (LockObject)
 			{
-				_index++;
-				var channels = ChannelFactory.GetChannels(serviceName);
 
+				var channels = ChannelFactory.GetChannels(serviceName);
+				if (!channels.Any())
+					throw new System.Exception("No service node");
+				_index++;
 				if (_index > channels.Count - 1)
 					_index = 0;
-
 				return channels[_index];
 			}
 		}
