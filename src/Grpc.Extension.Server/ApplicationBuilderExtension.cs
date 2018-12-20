@@ -42,7 +42,7 @@ namespace Grpc.Extension.Server
 					throw new InvalidOperationException($"Type {service.Name} is not a grpc service");
 				var serviceInstance = Activator.CreateInstance(service);
 				var binder = bindMethod.Invoke(null, new[] { serviceInstance }) as ServerServiceDefinition;
-				server.Services.Add(binder.Intercept(new DependencyInjectionInterceptor(app.ApplicationServices, serviceInstance)));
+				server.Services.Add(binder.Intercept(new DependencyInjectionInterceptor(app.ApplicationServices)));
 			}
 
 			server.Services.Add(Health.V1.Health.BindService(new HealthCheckService.HealthCheckService()));

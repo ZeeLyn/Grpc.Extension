@@ -10,7 +10,6 @@ namespace Grpc.Extension.Server
 		public static GrpcServerConfiguration AddService<T>(this GrpcServerConfiguration configure) where T : class, IGrpcService
 		{
 			configure.Services.Add(typeof(T));
-
 			return configure;
 		}
 

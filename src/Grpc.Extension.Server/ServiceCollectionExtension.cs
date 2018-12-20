@@ -7,7 +7,7 @@ namespace Grpc.Extension.Server
 	{
 		public static IServiceCollection AddGrpcServer(this IServiceCollection serviceCollection, Action<GrpcServerConfiguration> configure)
 		{
-			var conf = new GrpcServerConfiguration { ServiceCollection = serviceCollection };
+			var conf = new GrpcServerConfiguration();
 			configure?.Invoke(conf);
 			serviceCollection.AddSingleton(conf);
 			serviceCollection.AddScoped<ServiceProviderMetadataEntry>();

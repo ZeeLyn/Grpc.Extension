@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Grpc.Core;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Grpc.Extension.Server
 {
@@ -15,6 +16,11 @@ namespace Grpc.Extension.Server
 				throw new InvalidOperationException($"{ServiceProviderMetadataEntry.MetadataKey} request header metadata not found.");
 
 			return serviceProvider.ServiceProvider;
+		}
+
+		public static T GetService<T>(this ServerCallContext context)
+		{
+			return context.GetServiceProvider().GetService<T>();
 		}
 	}
 }

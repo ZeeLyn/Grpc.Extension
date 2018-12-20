@@ -12,16 +12,9 @@ namespace Grpc.Extension.Server
 	{
 		private IServiceProvider ServiceProvider { get; }
 
-		private PropertyInfo[] ServiceProperties { get; }
-
-		private object ServiceInstance { get; }
-
-		public DependencyInjectionInterceptor(IServiceProvider serviceProvider, object serviceInstance)
+		public DependencyInjectionInterceptor(IServiceProvider serviceProvider)
 		{
 			ServiceProvider = serviceProvider;
-			ServiceInstance = serviceInstance;
-			var serviceType = serviceInstance.GetType();
-			ServiceProperties = serviceType.GetProperties();
 		}
 
 
@@ -30,13 +23,7 @@ namespace Grpc.Extension.Server
 		{
 			using (var serviceScope = ServiceProvider.CreateScope())
 			{
-				foreach (var p in ServiceProperties)
-				{
-					var value = serviceScope.ServiceProvider.GetRequiredService(p.PropertyType);
-					p.SetValue(ServiceInstance, value);
-				}
-
-				//context.RequestHeaders.Add(serviceScope.ServiceProvider.GetService<ServiceProviderMetadataEntry>());
+				context.RequestHeaders.Add(serviceScope.ServiceProvider.GetService<ServiceProviderMetadataEntry>());
 				return await base.UnaryServerHandler(request, context, continuation);
 			}
 		}
