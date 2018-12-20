@@ -27,7 +27,6 @@ namespace Grpc.Extension.Client
 			applicationLifetime.ApplicationStopping.Register(() =>
 			{
 				CancellationTokenSource.Cancel();
-
 			});
 
 			Task.Factory.StartNew(async () =>
@@ -38,8 +37,6 @@ namespace Grpc.Extension.Client
 					await Task.Delay(configure.ChannelStatusCheckInterval, CancellationTokenSource.Token);
 				}
 			}, CancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-
-
 
 			return app;
 		}

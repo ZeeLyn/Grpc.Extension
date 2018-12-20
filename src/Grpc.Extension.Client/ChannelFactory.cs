@@ -29,8 +29,8 @@ namespace Grpc.Extension.Client
 
 		public List<Channel> GetChannels(string serviceName, ChannelEndPointStatus status = ChannelEndPointStatus.Passing)
 		{
-			if (!GrpcClientConfiguration.ServicesConfiguration.Any(p =>
-				p.ServiceName.Equals(serviceName, StringComparison.CurrentCultureIgnoreCase)))
+			if (!GrpcClientConfiguration.ServicesCredentials.Any(p =>
+				p.Key.Equals(serviceName, StringComparison.CurrentCultureIgnoreCase)))
 				throw new InvalidOperationException($"Not found service {serviceName}");
 			if (ServiceChannels.TryGetValue(serviceName, out var result))
 				return result.FindAll(p => p.Status == status).Select(p => p.Channel).ToList();
@@ -46,17 +46,17 @@ namespace Grpc.Extension.Client
 				using (await _asyncLock.LockAsync(cancellationToken))
 				{
 					Logger.LogInformation("Get the lock,start refresh...");
-					foreach (var service in GrpcClientConfiguration.ServicesConfiguration)
+					foreach (var service in GrpcClientConfiguration.ServicesCredentials)
 					{
 						if (cancellationToken.IsCancellationRequested)
 							break;
 
-						var healthEndPoints = (await GetHealthService(service.ServiceName, cancellationToken: cancellationToken));
+						var healthEndPoints = (await GetHealthService(service.Key, cancellationToken: cancellationToken));
 
 						if (cancellationToken.IsCancellationRequested)
 							break;
 
-						if (ServiceChannels.TryGetValue(service.ServiceName, out var channels))
+						if (ServiceChannels.TryGetValue(service.Key, out var channels))
 						{
 							foreach (var channel in channels)
 							{
@@ -83,7 +83,7 @@ namespace Grpc.Extension.Client
 								{
 									Address = p.Service.Address,
 									Port = p.Service.Port,
-									Channel = new Channel(p.Service.Address, p.Service.Port, service.ChannelCredentials),
+									Channel = new Channel(p.Service.Address, p.Service.Port, service.Value),
 									Status = ChannelEndPointStatus.Passing
 								}).ToList();
 
@@ -95,14 +95,14 @@ namespace Grpc.Extension.Client
 						}
 						else
 						{
-							ServiceChannels.Add(service.ServiceName, healthEndPoints.Select(p => new ChannelEndPoint
+							ServiceChannels.Add(service.Key, healthEndPoints.Select(p => new ChannelEndPoint
 							{
 								Address = p.Service.Address,
 								Port = p.Service.Port,
-								Channel = new Channel(p.Service.Address, p.Service.Port, service.ChannelCredentials),
+								Channel = new Channel(p.Service.Address, p.Service.Port, service.Value),
 								Status = ChannelEndPointStatus.Passing
 							}).ToList());
-							Logger.LogInformation($"Discover a new {service.ServiceName} service node.");
+							Logger.LogInformation($"Discover a new {service.Key} service node.");
 						}
 					}
 				}

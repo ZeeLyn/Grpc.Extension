@@ -13,16 +13,11 @@ namespace Grpc.Client.Controllers
 	[ApiController]
 	public class ValuesController : ControllerBase
 	{
-		private ChannelFactory ChannelFactory { get; }
-
-		private GrpcLoadBalance GrpcLoadBalance { get; }
 
 		private ClientFactory ClientFactory { get; }
 
-		public ValuesController(ChannelFactory channelFactory, GrpcLoadBalance grpcLoadBalance, ClientFactory clientFactory)
+		public ValuesController(ClientFactory clientFactory)
 		{
-			ChannelFactory = channelFactory;
-			GrpcLoadBalance = grpcLoadBalance;
 			ClientFactory = clientFactory;
 		}
 
@@ -30,21 +25,11 @@ namespace Grpc.Client.Controllers
 		[HttpGet]
 		public IActionResult Get()
 		{
-			//var channel = new Channel("192.168.1.129:50051", ChannelCredentials.Insecure);
-			//var client = new Hello.HelloClient(channel);
-			//return Ok(new
-			//{
-			//	gRpc = client.SayHello(new HelloRequest
-			//	{
-			//		Name = "Owen"
-			//	}),
-			//	services = ChannelFactory.GetChannels("grpc-server1")
-			//});
-			//var channel = GrpcLoadBalance.GetService("grpc-server");
-			var ch = new Channel("192.168.1.129", 50054, ChannelCredentials.Insecure);
-			var client = new Hello.HelloClient(ch);
 
-			//var client = ClientFactory.Get<Hello.HelloClient>("grpc-server");
+			//var ch = new Channel("192.168.1.129", 50054, ChannelCredentials.Insecure);
+			//var client = new Hello.HelloClient(ch);
+
+			var client = ClientFactory.Get<Hello.HelloClient>("grpc-server");
 			return Ok(client.SayHello(new HelloRequest
 			{
 				Name = "Owen"

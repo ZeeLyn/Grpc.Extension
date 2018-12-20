@@ -14,25 +14,10 @@ namespace Grpc.Extension.Client
 
 		internal ConsulClientConfiguration ConsulClientConfiguration { get; set; }
 
-		internal List<ServiceConfiguration> ServicesConfiguration { get; set; } = new List<ServiceConfiguration>();
+		internal Dictionary<string, ChannelCredentials> ServicesCredentials { get; set; } =
+			new Dictionary<string, ChannelCredentials>();
 
 		internal List<Type> ClientTypes { get; set; } = new List<Type>();
 	}
 
-	public class ServiceConfiguration
-	{
-		public ServiceConfiguration()
-		{
-		}
-
-		public ServiceConfiguration(string serviceName, ChannelCredentials channelCredentials)
-		{
-			ServiceName = serviceName;
-			ChannelCredentials = channelCredentials;
-		}
-
-		public string ServiceName { get; set; }
-
-		public ChannelCredentials ChannelCredentials { get; set; } = ChannelCredentials.Insecure;
-	}
 }
