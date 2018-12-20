@@ -7,6 +7,6 @@ namespace Grpc.Extension.Client.LoadBalance
 	{
 		public static Type RoundRobin { get; set; } = typeof(GrpcLoadBalanceRound);
 
-		public abstract Channel GetService(string serviceName);
+		public abstract Channel GetChannel(string serviceName);
 	}
 }

@@ -32,7 +32,6 @@ namespace Grpc.Client
 			{
 				options.AddConsul(client => { client.Address = new Uri("http://192.168.1.142:8500"); });
 				options.AddServiceCredentials("grpc-server", ChannelCredentials.Insecure);
-				options.AddServiceCredentials("grpc-server", ChannelCredentials.Insecure);
 				options.ChannelStatusCheckInterval = TimeSpan.FromSeconds(15);
 				options.AddClient<Hello.HelloClient>();
 			});

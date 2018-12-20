@@ -16,11 +16,10 @@ namespace Grpc.Extension.Client.LoadBalance
 
 		private static readonly object LockObject = new object();
 
-		public override Channel GetService(string serviceName)
+		public override Channel GetChannel(string serviceName)
 		{
 			lock (LockObject)
 			{
-
 				var channels = ChannelFactory.GetChannels(serviceName);
 				if (!channels.Any())
 					throw new System.Exception("No service node");

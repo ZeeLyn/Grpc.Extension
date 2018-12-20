@@ -31,17 +31,22 @@ namespace Grpc.Server.WebApp
 			services.AddScoped<RepertoryService>();
 			services.AddGrpcServer(configure =>
 			{
-				configure.AddServerPort(Configuration.GetSection("GrpcServer:Host").Get<string>(), Configuration.GetSection("GrpcServer:Port").Get<int>(), ServerCredentials.Insecure);
-				configure.AddService<HelloService>();
-				configure.AddConsul(agent =>
+				configure.AddServerPort(Configuration.GetSection("GrpcServer:Host").Get<string>(),
+					Configuration.GetSection("GrpcServer:Port").Get<int>(), ServerCredentials.Insecure);
+				configure.AddConsul(
+					client => { client.Address = new Uri("http://192.168.1.142:8500"); },
+					service =>
 					{
-						agent.Address = Configuration.GetSection("GrpcServer:Host").Get<string>();
-						agent.Port = Configuration.GetSection("GrpcServer:Port").Get<int>();
-						agent.ServiceId = $"{Configuration.GetSection("GrpcServer:Host").Get<string>()}:{Configuration.GetSection("GrpcServer:Port").Get<int>()}";
-						agent.ServiceName = "grpc-server";
-						agent.HealthCheck = (Configuration.GetSection("GrpcServer:Host").Get<string>(), Configuration.GetSection("Port").Get<int>());
-					},
-					client => { client.Address = new Uri("http://192.168.1.142:8500"); });
+						service.Address = Configuration.GetSection("GrpcServer:Host").Get<string>();
+						service.Port = Configuration.GetSection("GrpcServer:Port").Get<int>();
+						service.ServiceId =
+							$"{Configuration.GetSection("GrpcServer:Host").Get<string>()}:{Configuration.GetSection("GrpcServer:Port").Get<int>()}";
+						service.ServiceName = "grpc-server";
+						service.HealthCheck = (Configuration.GetSection("GrpcServer:Host").Get<string>(),
+							Configuration.GetSection("Port").Get<int>());
+						service.HealthCheckInterval = TimeSpan.FromSeconds(10);
+					});
+				configure.AddService<HelloService>();
 			});
 		}
 

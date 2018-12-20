@@ -7,7 +7,6 @@ namespace Grpc.Extension.Server
 {
 	public class GrpcServerConfiguration
 	{
-		//internal IServiceCollection ServiceCollection { get; set; }
 		public Action<ServerPort> GrpcServerConfig { get; set; }
 
 		internal ServerPort ServerPort { get; set; }
@@ -37,6 +36,8 @@ namespace Grpc.Extension.Server
 		public string[] Tags { get; set; }
 
 		public (string Host, int Port)? HealthCheck { get; set; }
+
+		public TimeSpan HealthCheckInterval { get; set; } = TimeSpan.FromSeconds(10);
 	}
 
 }

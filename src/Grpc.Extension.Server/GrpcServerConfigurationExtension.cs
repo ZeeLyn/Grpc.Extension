@@ -20,16 +20,16 @@ namespace Grpc.Extension.Server
 			return configure;
 		}
 
-		public static GrpcServerConfiguration AddConsul(this GrpcServerConfiguration configure, Action<ConsulAgentServiceConfiguration> agentServiceBuilder, Action<ConsulClientConfiguration> clientBuilder)
+		public static GrpcServerConfiguration AddConsul(this GrpcServerConfiguration configure, Action<ConsulClientConfiguration> clientBuilder, Action<ConsulAgentServiceConfiguration> serviceBuilder)
 		{
 			var agent = new ConsulAgentServiceConfiguration();
-			agentServiceBuilder?.Invoke(agent);
+			serviceBuilder?.Invoke(agent);
 			configure.AgentServiceConfiguration = new AgentServiceRegistration
 			{
 				Address = agent.Address,
 				Port = agent.Port,
-				ID = agent.ServiceId,
-				Name = agent.ServiceName,
+				ID = string.IsNullOrWhiteSpace(agent.ServiceId) ? $"{agent.Address}:{agent.Port}" : agent.ServiceId,
+				Name = string.IsNullOrWhiteSpace(agent.ServiceName) ? $"{agent.Address}:{agent.Port}" : agent.ServiceName,
 				EnableTagOverride = agent.EnableTagOverride,
 				Meta = agent.Meta,
 				Tags = agent.Tags
@@ -39,7 +39,7 @@ namespace Grpc.Extension.Server
 				configure.AgentServiceConfiguration.Check = new AgentServiceCheck
 				{
 					DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(10),
-					Interval = TimeSpan.FromSeconds(10),
+					Interval = agent.HealthCheckInterval,
 					Timeout = TimeSpan.FromSeconds(3),
 					HTTP = $"http://{agent.HealthCheck.Value.Host}:{agent.HealthCheck.Value.Port}/grpc/server/health/check"
 				};

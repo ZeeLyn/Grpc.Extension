@@ -24,7 +24,7 @@ namespace Grpc.Extension.Client
 			var type = GrpcClientConfiguration.ClientTypes.FirstOrDefault(p => p == typeof(T));
 			if (type == null)
 				throw new InvalidOperationException();
-			var channel = GrpcLoadBalance.GetService(serviceName);
+			var channel = GrpcLoadBalance.GetChannel(serviceName);
 			return (T)Activator.CreateInstance(type, channel);
 		}
 	}
