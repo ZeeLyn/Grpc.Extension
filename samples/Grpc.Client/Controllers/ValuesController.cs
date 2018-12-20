@@ -40,10 +40,11 @@ namespace Grpc.Client.Controllers
 			//	}),
 			//	services = ChannelFactory.GetChannels("grpc-server1")
 			//});
-			var channel = GrpcLoadBalance.GetService("grpc-server");
-			var c = new Hello.HelloClient(channel);
+			//var channel = GrpcLoadBalance.GetService("grpc-server");
+			var ch = new Channel("192.168.1.129", 50054, ChannelCredentials.Insecure);
+			var client = new Hello.HelloClient(ch);
 
-			var client = ClientFactory.Get<Hello.HelloClient>("grpc-server");
+			//var client = ClientFactory.Get<Hello.HelloClient>("grpc-server");
 			return Ok(client.SayHello(new HelloRequest
 			{
 				Name = "Owen"

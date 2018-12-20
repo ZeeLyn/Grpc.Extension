@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Grpc.Extension.Client
 {
@@ -17,13 +18,11 @@ namespace Grpc.Extension.Client
 
 		public static IApplicationBuilder UseGrpcClient(this IApplicationBuilder app)
 		{
-			var applicationLifetime =
-				(IApplicationLifetime)app.ApplicationServices.GetService(typeof(IApplicationLifetime));
+			var applicationLifetime = app.ApplicationServices.GetService<IApplicationLifetime>();
 
-			var configure =
-				(GrpcClientConfiguration)app.ApplicationServices.GetService(typeof(GrpcClientConfiguration));
+			var configure = app.ApplicationServices.GetService<GrpcClientConfiguration>();
 
-			var channelFactory = (ChannelFactory)app.ApplicationServices.GetService(typeof(ChannelFactory));
+			var channelFactory = app.ApplicationServices.GetService<ChannelFactory>();
 
 			applicationLifetime.ApplicationStopping.Register(() =>
 			{

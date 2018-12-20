@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using Consul;
 using Grpc.Core;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Grpc.Extension.Server
 {
 	public class GrpcServerConfiguration
 	{
+		internal IServiceCollection ServiceCollection { get; set; }
 		public Action<ServerPort> GrpcServerConfig { get; set; }
 
 		internal ServerPort ServerPort { get; set; }
@@ -15,7 +17,7 @@ namespace Grpc.Extension.Server
 
 		internal ConsulClientConfiguration ConsulClientConfiguration { get; set; }
 
-		internal List<ServerServiceDefinition> Services { get; set; } = new List<ServerServiceDefinition>();
+		internal List<Type> Services { get; set; } = new List<Type>();
 
 	}
 

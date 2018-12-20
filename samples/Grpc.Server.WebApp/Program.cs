@@ -18,7 +18,12 @@ namespace Grpc.Server.WebApp
 		}
 
 		public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-			WebHost.CreateDefaultBuilder(args).ConfigureAppConfiguration(config => { config.AddJsonFile("appsettings.json"); })
+			WebHost.CreateDefaultBuilder(args).ConfigureAppConfiguration(config => { config.AddJsonFile("appsettings.json"); }).ConfigureLogging((hostingContext, logging) =>
+				{
+					logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
+					logging.AddDebug();
+					logging.AddConsole();
+				})
 				.UseStartup<Startup>();
 	}
 }

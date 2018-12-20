@@ -1,25 +1,19 @@
 ﻿using System.Threading.Tasks;
 using Grpc.Core;
+using Grpc.Extension.Server;
 using Microsoft.Extensions.Configuration;
 
 namespace Grpc.Server.WebApp
 {
-	public class HelloService : Hello.HelloBase
+	public class HelloService : Hello.HelloBase, IGrpcService
 	{
 		private IConfiguration configuration;
 
-		public HelloService()
-		{
-		}
+		public RepertoryService RepertoryService { get; set; }
 
-		public HelloService(IConfiguration config)
+		public override async Task<HelloReply> SayHello(HelloRequest request, ServerCallContext context)
 		{
-			configuration = config;
-		}
-
-		public override Task<HelloReply> SayHello(HelloRequest request, ServerCallContext context)
-		{
-			return Task.FromResult(new HelloReply { Message = $"{configuration == null} Hello " + request.Name });
+			return await Task.FromResult(new HelloReply { Message = $"1:{RepertoryService.GetGuid()} Hello " + request.Name });
 		}
 	}
 }

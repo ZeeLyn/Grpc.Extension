@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Grpc.Extension.Client
 {
-	public class AsyncLock
+	internal class AsyncLock
 	{
 		private object _reentrancy = new object();
 		private int _reentrances = 0;

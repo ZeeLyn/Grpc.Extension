@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using Consul;
+using Grpc.Core;
+using Grpc.Core.Interceptors;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Grpc.Extension.Server
 {
@@ -20,12 +24,8 @@ namespace Grpc.Extension.Server
 
 		public static IApplicationBuilder UseGrpcServer(this IApplicationBuilder app)
 		{
-			var applicationLifetime =
-				(IApplicationLifetime)app.ApplicationServices.GetService(typeof(IApplicationLifetime));
-
-			var configure =
-				(GrpcServerConfiguration)app.ApplicationServices.GetService(typeof(GrpcServerConfiguration));
-
+			var applicationLifetime = app.ApplicationServices.GetService<IApplicationLifetime>();
+			var configure = app.ApplicationServices.GetService<GrpcServerConfiguration>();
 			if (configure.ServerPort == null)
 				throw new ArgumentNullException(nameof(configure.ServerPort));
 
@@ -33,18 +33,26 @@ namespace Grpc.Extension.Server
 			{
 				Ports = { configure.ServerPort }
 			};
+
 			foreach (var service in configure.Services)
 			{
-				server.Services.Add(service);
+				var bindMethod = service.BaseType?.DeclaringType?.GetMethods().FirstOrDefault(p =>
+					p.Name == "BindService" && p.ReturnType == typeof(ServerServiceDefinition) && p.IsPublic);
+				if (bindMethod == null)
+					throw new InvalidOperationException($"Type {service.Name} is not a grpc service");
+				var serviceInstance = Activator.CreateInstance(service);
+				var binder = bindMethod.Invoke(null, new[] { serviceInstance }) as ServerServiceDefinition;
+				server.Services.Add(binder.Intercept(new DependencyInjectionInterceptor(app.ApplicationServices, serviceInstance)));
 			}
+
+			server.Services.Add(Health.V1.Health.BindService(new HealthCheckService.HealthCheckService()));
 
 			applicationLifetime.ApplicationStopping.Register(() =>
 			{
 				CancellationTokenSource.Cancel();
 				using (var consul = new ConsulClient(conf => { conf.Address = configure.ConsulClientConfiguration.Address; }))
 				{
-
-					consul.Agent.ServiceDeregister(configure.AgentServiceConfiguration.ID, CancellationTokenSource.Token)
+					consul.Agent.ServiceDeregister(configure.AgentServiceConfiguration.ID)
 						.GetAwaiter().GetResult();
 				}
 

@@ -7,10 +7,11 @@ namespace Grpc.Extension.Server
 	{
 		public static IServiceCollection AddGrpcServer(this IServiceCollection serviceCollection, Action<GrpcServerConfiguration> configure)
 		{
-			var conf = new GrpcServerConfiguration();
+			var conf = new GrpcServerConfiguration { ServiceCollection = serviceCollection };
 			configure?.Invoke(conf);
 			serviceCollection.AddSingleton(conf);
-			conf.Services.Add(Health.V1.Health.BindService(new HealthCheckService.HealthCheckService()));
+			serviceCollection.AddScoped<ServiceProviderMetadataEntry>();
+
 			return serviceCollection;
 		}
 	}

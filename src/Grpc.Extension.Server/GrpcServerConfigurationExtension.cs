@@ -1,14 +1,16 @@
 ﻿using System;
 using Consul;
 using Grpc.Core;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Grpc.Extension.Server
 {
 	public static class GrpcServerConfigurationExtension
 	{
-		public static GrpcServerConfiguration AddService(this GrpcServerConfiguration configure, params ServerServiceDefinition[] serverServiceDefinition)
+		public static GrpcServerConfiguration AddService<T>(this GrpcServerConfiguration configure) where T : class, IGrpcService
 		{
-			configure.Services.AddRange(serverServiceDefinition);
+			configure.Services.Add(typeof(T));
+
 			return configure;
 		}
 

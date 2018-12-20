@@ -14,4 +14,8 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="2.2.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\samples\Grpc.Statement\Grpc.Statement.csproj" />
+  </ItemGroup>
+
 </Project>

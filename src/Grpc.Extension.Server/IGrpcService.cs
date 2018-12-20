@@ -4,8 +4,7 @@ using System.Text;
 
 namespace Grpc.Extension.Server
 {
-	public class ServerOptions
+	public interface IGrpcService
 	{
-
 	}
 }
