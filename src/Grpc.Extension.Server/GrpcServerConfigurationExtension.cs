@@ -33,15 +33,14 @@ namespace Grpc.Extension.Server
 				Meta = agent.Meta,
 				Tags = agent.Tags
 			};
-			if (agent.HealthCheck != null)
+			if (agent.HealthCheckInterval.Ticks > 0)
 			{
 				configure.AgentServiceConfiguration.Check = new AgentServiceCheck
 				{
 					DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(10),
 					Interval = agent.HealthCheckInterval,
 					Timeout = TimeSpan.FromSeconds(3),
-					HTTP = $"http://{agent.HealthCheck.Value.Host}:{agent.HealthCheck.Value.Port}/grpc/server/health/check",
-					//GRPC = $"{agent.Address}:{agent.Port}"
+					GRPC = $"{agent.Address}:{agent.Port}"
 				};
 			}
 

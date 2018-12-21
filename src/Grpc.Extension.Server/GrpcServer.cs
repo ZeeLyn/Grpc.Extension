@@ -7,7 +7,6 @@ using Grpc.Core;
 using Grpc.Core.Interceptors;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -76,17 +75,17 @@ namespace Grpc.Extension.Server
 				{
 					Logger.LogInformation("---------------> Start registering consul service...");
 
-					if (configure.AgentServiceConfiguration.Check != null)
-					{
-						app.Map("/grpc/server/health/check", builder =>
-						{
-							builder.Run(async handler =>
-							{
-								handler.Response.StatusCode = (int)HttpStatusCode.OK;
-								await handler.Response.WriteAsync($"{{\"Status\":\"{HttpStatusCode.OK}\"}}");
-							});
-						});
-					}
+					//if (configure.AgentServiceConfiguration.Check != null)
+					//{
+					//	app.Map("/grpc/server/health/check", builder =>
+					//	{
+					//		builder.Run(async handler =>
+					//		{
+					//			handler.Response.StatusCode = (int)HttpStatusCode.OK;
+					//			await handler.Response.WriteAsync($"{{\"Status\":\"{HttpStatusCode.OK}\"}}");
+					//		});
+					//	});
+					//}
 
 					using (var consul = new ConsulClient(conf =>
 					{

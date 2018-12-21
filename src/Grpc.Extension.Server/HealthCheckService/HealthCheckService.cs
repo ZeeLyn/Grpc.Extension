@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Health.V1;
 using Microsoft.Extensions.Logging;
@@ -20,8 +16,7 @@ namespace Grpc.Extension.Server.HealthCheckService
 
 		public override async Task<HealthCheckResponse> Check(HealthCheckRequest request, ServerCallContext context)
 		{
-			//File.AppendAllText("hc.log", DateTime.Now + "\n\n");
-			Logger.LogInformation("--------------->HC");
+			Logger.LogInformation("---------------> Health checking...");
 			return await Task.FromResult(new HealthCheckResponse
 			{
 				Status = HealthCheckResponse.Types.ServingStatus.Serving

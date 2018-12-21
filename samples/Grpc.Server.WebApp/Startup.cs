@@ -38,10 +38,7 @@ namespace Grpc.Server.WebApp
 					{
 						service.Address = Configuration.GetSection("GrpcServer:Host").Get<string>();
 						service.Port = Configuration.GetSection("GrpcServer:Port").Get<int>();
-						service.ServiceId =
-							$"{Configuration.GetSection("GrpcServer:Host").Get<string>()}:{Configuration.GetSection("GrpcServer:Port").Get<int>()}";
 						service.ServiceName = "grpc-server";
-						service.HealthCheck = (Configuration.GetSection("GrpcServer:Host").Get<string>(), Configuration.GetSection("Port").Get<int>());
 						service.HealthCheckInterval = TimeSpan.FromSeconds(10);
 					});
 				configure.AddService<HelloService>();
@@ -55,7 +52,6 @@ namespace Grpc.Server.WebApp
 			{
 				app.UseDeveloperExceptionPage();
 			}
-
 			app.UseMvc();
 			app.UseGrpcServer();
 		}

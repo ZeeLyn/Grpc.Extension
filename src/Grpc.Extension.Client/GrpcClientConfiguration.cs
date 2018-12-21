@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Consul;
 using Grpc.Core;
-using Grpc.Extension.Client.LoadBalance;
 
 namespace Grpc.Extension.Client
 {

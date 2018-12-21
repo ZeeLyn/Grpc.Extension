@@ -35,7 +35,7 @@ namespace Grpc.Extension.Server
 
 		public string[] Tags { get; set; }
 
-		public (string Host, int Port)? HealthCheck { get; set; }
+		//public (string Host, int Port)? HealthCheck { get; set; }
 
 		public TimeSpan HealthCheckInterval { get; set; } = TimeSpan.FromSeconds(10);
 	}
