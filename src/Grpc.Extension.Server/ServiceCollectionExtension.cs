@@ -10,9 +10,9 @@ namespace Grpc.Extension.Server
 			var conf = new GrpcServerConfiguration();
 			configure?.Invoke(conf);
 			serviceCollection.AddSingleton(conf);
-			serviceCollection.AddScoped<ServiceProviderMetadataEntry>();
 			serviceCollection.AddSingleton<GrpcServer>();
 			serviceCollection.AddSingleton<HealthCheckService.HealthCheckService>();
+			serviceCollection.AddScoped<ServiceProviderMetadataEntry>();
 			return serviceCollection;
 		}
 	}
