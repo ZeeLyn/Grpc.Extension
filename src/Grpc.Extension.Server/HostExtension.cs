@@ -16,8 +16,8 @@ namespace Grpc.Extension.Server
 
 		//public static IHost UseGrpcServer(this IHost host)
 		//{
-		//	var applicationLifetime =
-		//		(IApplicationLifetime)host.Services.GetService(typeof(IApplicationLifetime));
+		//var applicationLifetime =
+		//	(IApplicationLifetime)host.Services.GetService(typeof(IApplicationLifetime));
 
 		//	var configure = (GrpcServerConfiguration)host.Services.GetService(typeof(GrpcServerConfiguration));
 

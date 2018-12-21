@@ -103,7 +103,7 @@ namespace Grpc.Extension.Server
 							.GetAwaiter().GetResult();
 						if (result.StatusCode != HttpStatusCode.OK)
 						{
-							Logger.LogError("--------------->  Registration service failed");
+							Logger.LogError("--------------->  Registration service failed:{0}", result.StatusCode);
 							throw new ConsulRequestException("Registration service failed.", result.StatusCode);
 						}
 						Logger.LogInformation("---------------> Consul service registration completed");
