@@ -7,8 +7,6 @@ namespace Grpc.Extension.Server
 {
 	public class GrpcServerConfiguration
 	{
-		public Action<ServerPort> GrpcServerConfig { get; set; }
-
 		internal ServerPort ServerPort { get; set; }
 
 		internal AgentServiceRegistration AgentServiceConfiguration { get; set; }

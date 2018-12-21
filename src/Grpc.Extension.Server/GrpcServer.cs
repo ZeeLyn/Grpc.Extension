@@ -39,6 +39,7 @@ namespace Grpc.Extension.Server
 					Ports = { configure.ServerPort }
 				};
 
+				//Register grpc service
 				foreach (var service in configure.Services)
 				{
 					var bindMethod = service.BaseType?.DeclaringType?.GetMethods().FirstOrDefault(p =>
@@ -49,12 +50,14 @@ namespace Grpc.Extension.Server
 					var binder = bindMethod.Invoke(null, new[] { serviceInstance }) as ServerServiceDefinition;
 					server.Services.Add(binder.Intercept(new DependencyInjectionInterceptor(app.ApplicationServices)));
 				}
-
+				//Register health check service
 				server.Services.Add(Health.V1.Health.BindService(app.ApplicationServices.GetService<HealthCheckService.HealthCheckService>()));
 
+				//Stop service
 				applicationLifetime.ApplicationStopping.Register(() =>
 				{
 					CancellationTokenSource.Cancel();
+					server.ShutdownAsync().GetAwaiter().GetResult();
 					using (var consul = new ConsulClient(conf =>
 					{
 						conf.Address = configure.ConsulClientConfiguration.Address;
@@ -64,7 +67,6 @@ namespace Grpc.Extension.Server
 							.GetAwaiter().GetResult();
 					}
 
-					server.ShutdownAsync().GetAwaiter().GetResult();
 				});
 
 				server.Start();
@@ -95,6 +97,7 @@ namespace Grpc.Extension.Server
 						conf.WaitTime = configure.ConsulClientConfiguration.WaitTime;
 					}))
 					{
+						//Register consul agent service
 						var result = consul.Agent
 							.ServiceRegister(configure.AgentServiceConfiguration, CancellationTokenSource.Token)
 							.GetAwaiter().GetResult();
