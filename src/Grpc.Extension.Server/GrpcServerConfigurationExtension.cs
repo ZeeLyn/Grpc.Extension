@@ -1,7 +1,6 @@
 ﻿using System;
 using Consul;
 using Grpc.Core;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Grpc.Extension.Server
 {
@@ -41,7 +40,8 @@ namespace Grpc.Extension.Server
 					DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(10),
 					Interval = agent.HealthCheckInterval,
 					Timeout = TimeSpan.FromSeconds(3),
-					HTTP = $"http://{agent.HealthCheck.Value.Host}:{agent.HealthCheck.Value.Port}/grpc/server/health/check"
+					HTTP = $"http://{agent.HealthCheck.Value.Host}:{agent.HealthCheck.Value.Port}/grpc/server/health/check",
+					//GRPC = $"{agent.Address}:{agent.Port}"
 				};
 			}
 

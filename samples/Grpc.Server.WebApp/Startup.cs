@@ -26,7 +26,6 @@ namespace Grpc.Server.WebApp
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 			services.AddScoped<RepertoryService>();
 			services.AddGrpcServer(configure =>
@@ -42,8 +41,7 @@ namespace Grpc.Server.WebApp
 						service.ServiceId =
 							$"{Configuration.GetSection("GrpcServer:Host").Get<string>()}:{Configuration.GetSection("GrpcServer:Port").Get<int>()}";
 						service.ServiceName = "grpc-server";
-						service.HealthCheck = (Configuration.GetSection("GrpcServer:Host").Get<string>(),
-							Configuration.GetSection("Port").Get<int>());
+						service.HealthCheck = (Configuration.GetSection("GrpcServer:Host").Get<string>(), Configuration.GetSection("Port").Get<int>());
 						service.HealthCheckInterval = TimeSpan.FromSeconds(10);
 					});
 				configure.AddService<HelloService>();

@@ -11,7 +11,8 @@ namespace Grpc.Extension.Server
 			configure?.Invoke(conf);
 			serviceCollection.AddSingleton(conf);
 			serviceCollection.AddScoped<ServiceProviderMetadataEntry>();
-
+			serviceCollection.AddSingleton<GrpcServer>();
+			serviceCollection.AddSingleton<HealthCheckService.HealthCheckService>();
 			return serviceCollection;
 		}
 	}

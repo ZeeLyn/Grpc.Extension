@@ -18,4 +18,10 @@
     <ProjectReference Include="..\..\samples\Grpc.Statement\Grpc.Statement.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Consul">
+      <HintPath>lib\Consul.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

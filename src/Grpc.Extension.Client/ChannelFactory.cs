@@ -42,7 +42,7 @@ namespace Grpc.Extension.Client
 			Logger.LogInformation("Start refresh channel");
 			try
 			{
-				Logger.LogInformation("Waiting lock...");
+				Logger.LogInformation("Waiting for lock...");
 				using (await _asyncLock.LockAsync(cancellationToken))
 				{
 					Logger.LogInformation("Get the lock,start refresh...");

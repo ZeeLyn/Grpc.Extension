@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grpc.Client", "samples\Grpc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grpc.Server.Console", "samples\Grpc.Server.Console\Grpc.Server.Console.csproj", "{40F31FD0-DD1B-48A6-8875-E10035C26387}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grpc.Server.WebApp", "samples\Grpc.Server.WebApp\Grpc.Server.WebApp.csproj", "{07BB3BEE-A198-49E9-9DBD-B57E028376E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grpc.Server.WebApp", "samples\Grpc.Server.WebApp\Grpc.Server.WebApp.csproj", "{07BB3BEE-A198-49E9-9DBD-B57E028376E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
