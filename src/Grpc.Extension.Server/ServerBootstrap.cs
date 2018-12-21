@@ -12,13 +12,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Grpc.Extension.Server
 {
-	public class GrpcServer : IDisposable
+	public class ServerBootstrap : IDisposable
 	{
 		private CancellationTokenSource CancellationTokenSource { get; }
 
 		private ILogger Logger { get; }
 
-		public GrpcServer(ILogger<GrpcServer> logger)
+		public ServerBootstrap(ILogger<ServerBootstrap> logger)
 		{
 			CancellationTokenSource = new CancellationTokenSource();
 			Logger = logger;
@@ -97,7 +97,7 @@ namespace Grpc.Extension.Server
 						conf.WaitTime = configure.ConsulClientConfiguration.WaitTime;
 					}))
 					{
-						//Register consul agent service
+						//Register service to consul agent 
 						var result = consul.Agent
 							.ServiceRegister(configure.AgentServiceConfiguration, CancellationTokenSource.Token)
 							.GetAwaiter().GetResult();
@@ -106,7 +106,6 @@ namespace Grpc.Extension.Server
 							Logger.LogError("--------------->  Registration service failed");
 							throw new ConsulRequestException("Registration service failed.", result.StatusCode);
 						}
-
 						Logger.LogInformation("---------------> Consul service registration completed");
 					}
 				}

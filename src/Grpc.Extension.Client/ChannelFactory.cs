@@ -51,7 +51,7 @@ namespace Grpc.Extension.Client
 						if (cancellationToken.IsCancellationRequested)
 							break;
 
-						var healthEndPoints = (await GetHealthService(service.Key, cancellationToken: cancellationToken));
+						var healthEndPoints = await GetHealthService(service.Key, cancellationToken: cancellationToken);
 
 						if (cancellationToken.IsCancellationRequested)
 							break;

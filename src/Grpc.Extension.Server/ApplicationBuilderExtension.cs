@@ -16,8 +16,7 @@ namespace Grpc.Extension.Server
 
 		public static IApplicationBuilder UseGrpcServer(this IApplicationBuilder app)
 		{
-			var server = app.ApplicationServices.GetService<GrpcServer>();
-			server.Start(app);
+			app.ApplicationServices.GetService<ServerBootstrap>().Start(app);
 			return app;
 		}
 	}
