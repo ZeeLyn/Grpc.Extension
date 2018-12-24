@@ -31,7 +31,7 @@ namespace Grpc.Client
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 			services.AddGrpcClient(options =>
 			{
-				options.AddLoadBalancer(ILoadBalancer.Polling);
+				options.AddLoadBalancer(ILoadBalancer.WeightedPolling);
 				options.AddConsul(client => { client.Address = new Uri("http://192.168.1.142:8500"); });
 				options.AddServiceCredentials("grpc-server", ChannelCredentials.Insecure);
 				options.ChannelStatusCheckInterval = TimeSpan.FromSeconds(15);

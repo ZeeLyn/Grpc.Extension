@@ -30,9 +30,10 @@ namespace Grpc.Extension.Server
 		}
 
 		public static GrpcServerConfiguration AddServerPort(this GrpcServerConfiguration configure, string host,
-			int port, ServerCredentials serverCredentials)
+			int port, ServerCredentials serverCredentials, int weighted = 0)
 		{
 			configure.ServerPort = new ServerPort(host, port, serverCredentials);
+			configure.Weighted = weighted;
 			return configure;
 		}
 

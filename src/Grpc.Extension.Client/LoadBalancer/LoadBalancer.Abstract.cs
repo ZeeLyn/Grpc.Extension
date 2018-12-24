@@ -7,6 +7,8 @@ namespace Grpc.Extension.Client.LoadBalancer
 	{
 		public static Type Polling { get; set; } = typeof(LoadBalancerPolling);
 
-		public abstract Channel GetChannel(string serviceName);
+		public static Type WeightedPolling { get; set; } = typeof(LoadBalancerWeightedPolling);
+
+		public abstract Channel GetNextChannel(string serviceName);
 	}
 }

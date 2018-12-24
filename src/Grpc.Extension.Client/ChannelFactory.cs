@@ -11,7 +11,7 @@ namespace Grpc.Extension.Client
 {
 	public class ChannelFactory
 	{
-		private Dictionary<string, List<ChannelEndPoint>> ServiceChannels { get; }
+		private Dictionary<string, List<ChannelNode>> ServiceChannels { get; }
 
 		private GrpcClientConfiguration GrpcClientConfiguration { get; }
 
@@ -21,21 +21,22 @@ namespace Grpc.Extension.Client
 
 		public ChannelFactory(GrpcClientConfiguration gRpcClientConfiguration, ILogger<ChannelFactory> logger)
 		{
-			ServiceChannels = new Dictionary<string, List<ChannelEndPoint>>();
+			ServiceChannels = new Dictionary<string, List<ChannelNode>>();
 			GrpcClientConfiguration = gRpcClientConfiguration;
 			Logger = logger;
 		}
 
 
-		public List<Channel> GetChannels(string serviceName, ChannelEndPointStatus status = ChannelEndPointStatus.Passing)
+		public List<ChannelNode> GetChannelNodes(string serviceName, ChannelNodeStatus status = ChannelNodeStatus.Passing)
 		{
 			if (!GrpcClientConfiguration.ServicesCredentials.Any(p =>
-				p.Key.Equals(serviceName, StringComparison.CurrentCultureIgnoreCase)))
+				 p.Key.Equals(serviceName, StringComparison.CurrentCultureIgnoreCase)))
 				throw new InvalidOperationException($"Not found service {serviceName}");
 			if (ServiceChannels.TryGetValue(serviceName, out var result))
-				return result.FindAll(p => p.Status == status).Select(p => p.Channel).ToList();
-			return new List<Channel>();
+				return result.FindAll(p => p.Status == status);
+			return new List<ChannelNode>();
 		}
+
 
 		internal async Task RefreshChannels(CancellationToken cancellationToken)
 		{
@@ -65,26 +66,27 @@ namespace Grpc.Extension.Client
 								if (healthEndPoints.Any(p =>
 									channel.Address == p.Service.Address && channel.Port == p.Service.Port))
 								{
-									if (channel.Status == ChannelEndPointStatus.Passing) continue;
-									channel.Status = ChannelEndPointStatus.Passing;
+									if (channel.Status == ChannelNodeStatus.Passing) continue;
+									channel.Status = ChannelNodeStatus.Passing;
 									Logger.LogInformation($"The status of node {channel.Address}:{channel.Port} changes to passing.");
 								}
 								else
 								{
-									if (channel.Status == ChannelEndPointStatus.Critical)
+									if (channel.Status == ChannelNodeStatus.Critical)
 										continue;
-									channel.Status = ChannelEndPointStatus.Critical;
+									channel.Status = ChannelNodeStatus.Critical;
 									Logger.LogInformation($"The status of node {channel.Address}:{channel.Port} changes to critical.");
 								}
 							}
 
 							var newEndPoints = healthEndPoints.FindAll(p =>
-								!channels.Any(e => e.Address == p.Service.Address && e.Port == p.Service.Port)).Select(p => new ChannelEndPoint
+								!channels.Any(e => e.Address == p.Service.Address && e.Port == p.Service.Port)).Select(p => new ChannelNode
 								{
 									Address = p.Service.Address,
 									Port = p.Service.Port,
 									Channel = new Channel(p.Service.Address, p.Service.Port, service.Value),
-									Status = ChannelEndPointStatus.Passing
+									Status = ChannelNodeStatus.Passing,
+									Weight = int.Parse(p.Service.Meta.FirstOrDefault(m => m.Key == "X-Weight").Value)
 								}).ToList();
 
 							if (newEndPoints.Any())
@@ -95,12 +97,13 @@ namespace Grpc.Extension.Client
 						}
 						else
 						{
-							ServiceChannels.Add(service.Key, healthEndPoints.Select(p => new ChannelEndPoint
+							ServiceChannels.Add(service.Key, healthEndPoints.Select(p => new ChannelNode
 							{
 								Address = p.Service.Address,
 								Port = p.Service.Port,
 								Channel = new Channel(p.Service.Address, p.Service.Port, service.Value),
-								Status = ChannelEndPointStatus.Passing
+								Status = ChannelNodeStatus.Passing,
+								Weight = int.Parse(p.Service.Meta.FirstOrDefault(m => m.Key == "X-Weight").Value)
 							}).ToList());
 							Logger.LogInformation($"Discover a new {service.Key} service node.");
 						}

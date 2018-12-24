@@ -12,13 +12,59 @@ using Newtonsoft.Json;
 
 namespace Grpc.Server.Console
 {
+	public struct ServerConfig
+	{
+		/// <summary>
+		/// 初始权重
+		/// </summary>
+		public int Weight { get; set; }
+		/// <summary>
+		/// 当前权重
+		/// </summary>
+		public int Current { get; set; }
+		/// <summary>
+		/// 服务名称
+		/// </summary>
+		public string Name { get; set; }
+	}
+
 	class Program
 	{
+		public static int NextServerIndex(ServerConfig[] ss)
+		{
+			int index = -1;
+			int total = 0;
+			int size = ss.Count();
+
+			for (int i = 0; i < size; i++)
+			{
+				ss[i].Current += ss[i].Weight;
+				total += ss[i].Weight;
+
+				if (index == -1 || ss[index].Current < ss[i].Current)
+				{
+					index = i;
+				}
+			}
+
+			ss[index].Current -= total;
+			return index;
+		}
 		static async Task Main(string[] args)
 		{
-			var list1 = new List<int> { 1, 3, 4 };
-			var list2 = new List<int> { 2, 5, 3 };
-			System.Console.WriteLine(JsonConvert.SerializeObject(list1.Except(list2)));
+			var sv = new ServerConfig[] {
+				new ServerConfig{ Name="A",Weight=4},
+				new ServerConfig{ Name="B",Weight=2},
+				new ServerConfig{ Name="C",Weight=1}
+			};
+
+			int index = 0;
+			int sum = sv.Sum(m => m.Weight);
+			for (int i = 0; i < sum; i++)
+			{
+				index = NextServerIndex(sv);
+				System.Console.WriteLine("{0} {1}", sv[index].Name, sv[index].Weight);
+			}
 
 			//var c = ChannelFactory.GetService("grpc-server1");
 			//System.Console.WriteLine(JsonConvert.SerializeObject(c));

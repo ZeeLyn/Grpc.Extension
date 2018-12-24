@@ -14,6 +14,8 @@ namespace Grpc.Extension.Server
 		internal ConsulClientConfiguration ConsulClientConfiguration { get; set; }
 
 		internal Dictionary<Type, List<Type>> Services { get; set; } = new Dictionary<Type, List<Type>>();
+
+		internal int Weighted { get; set; }
 	}
 
 	public class ConsulAgentServiceConfiguration

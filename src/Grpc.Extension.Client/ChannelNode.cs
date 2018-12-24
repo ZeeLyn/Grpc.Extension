@@ -5,18 +5,23 @@ using Grpc.Core;
 
 namespace Grpc.Extension.Client
 {
-	public class ChannelEndPoint
+	public class ChannelNode
 	{
 		public string Address { get; set; }
 
 		public int Port { get; set; }
 
-		public ChannelEndPointStatus Status { get; set; } = ChannelEndPointStatus.Critical;
+		public ChannelNodeStatus Status { get; set; } = ChannelNodeStatus.Critical;
+
+		public int Weight { get; set; }
+		protected internal int CurrentWeight { get; set; }
 
 		public Channel Channel { get; set; }
+
+
 	}
 
-	public enum ChannelEndPointStatus
+	public enum ChannelNodeStatus
 	{
 		Critical = 0,
 		Passing = 1

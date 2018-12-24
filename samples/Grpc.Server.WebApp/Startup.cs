@@ -31,7 +31,7 @@ namespace Grpc.Server.WebApp
 			services.AddGrpcServer(configure =>
 			{
 				configure.AddServerPort(Configuration.GetSection("GrpcServer:Host").Get<string>(),
-					Configuration.GetSection("GrpcServer:Port").Get<int>(), ServerCredentials.Insecure);
+					Configuration.GetSection("GrpcServer:Port").Get<int>(), ServerCredentials.Insecure, Configuration.GetSection("GrpcServer:Weight").Get<int>());
 				configure.AddConsul(
 					client => { client.Address = new Uri("http://192.168.1.142:8500"); },
 					service =>

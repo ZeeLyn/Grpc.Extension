@@ -16,17 +16,17 @@ namespace Grpc.Extension.Client.LoadBalancer
 
 		private static readonly object LockObject = new object();
 
-		public override Channel GetChannel(string serviceName)
+		public override Channel GetNextChannel(string serviceName)
 		{
 			lock (LockObject)
 			{
-				var channels = ChannelFactory.GetChannels(serviceName);
+				var channels = ChannelFactory.GetChannelNodes(serviceName);
 				if (!channels.Any())
 					throw new System.Exception($"Service {serviceName} did not find available nodes.");
 				_index++;
 				if (_index > channels.Count - 1)
 					_index = 0;
-				return channels[_index];
+				return channels[_index].Channel;
 			}
 		}
 	}
