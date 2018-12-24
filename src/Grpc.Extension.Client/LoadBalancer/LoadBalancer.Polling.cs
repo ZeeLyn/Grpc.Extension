@@ -5,7 +5,7 @@ namespace Grpc.Extension.Client.LoadBalancer
 {
 	public class LoadBalancerPolling : ILoadBalancer
 	{
-		protected ChannelFactory ChannelFactory { get; }
+		internal ChannelFactory ChannelFactory { get; }
 
 		private int _index = -1;
 

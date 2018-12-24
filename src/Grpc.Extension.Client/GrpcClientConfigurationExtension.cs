@@ -8,16 +8,16 @@ namespace Grpc.Extension.Client
 {
 	public static class GrpcClientConfigurationExtension
 	{
-		public static GrpcClientConfiguration AddLoadBalance<TGrpcLoadBalance>(this GrpcClientConfiguration gRpcClientConfiguration) where TGrpcLoadBalance : ILoadBalancer
+		public static GrpcClientConfiguration AddLoadBalancer<TGrpcLoadBalance>(this GrpcClientConfiguration gRpcClientConfiguration) where TGrpcLoadBalance : ILoadBalancer
 		{
 			gRpcClientConfiguration.GrpcLoadBalance = typeof(TGrpcLoadBalance);
 			return gRpcClientConfiguration;
 		}
 
-		public static GrpcClientConfiguration AddLoadBalance(this GrpcClientConfiguration gRpcClientConfiguration, Type type)
+		public static GrpcClientConfiguration AddLoadBalancer(this GrpcClientConfiguration gRpcClientConfiguration, Type type)
 		{
 			if (!typeof(ILoadBalancer).IsAssignableFrom(type))
-				throw new TypeUnloadedException($"Type {type} does not implement GrpcLoadBalance");
+				throw new TypeUnloadedException($"Type {type} does not implement ILoadBalancer");
 			gRpcClientConfiguration.GrpcLoadBalance = type;
 			return gRpcClientConfiguration;
 		}
@@ -32,6 +32,8 @@ namespace Grpc.Extension.Client
 
 		public static GrpcClientConfiguration AddServiceCredentials(this GrpcClientConfiguration gRpcClientConfiguration, string serviceName, ChannelCredentials channelCredentials)
 		{
+			if (string.IsNullOrWhiteSpace(serviceName))
+				throw new ArgumentNullException(nameof(serviceName));
 			gRpcClientConfiguration.ServicesCredentials[serviceName] = channelCredentials;
 			return gRpcClientConfiguration;
 		}

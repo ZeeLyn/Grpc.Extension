@@ -24,7 +24,6 @@ namespace Grpc.Client.Controllers
 		[HttpGet]
 		public IActionResult Get()
 		{
-
 			//var ch = new Channel("192.168.1.129", 50054, ChannelCredentials.Insecure);
 			//var client = new Hello.HelloClient(ch);
 

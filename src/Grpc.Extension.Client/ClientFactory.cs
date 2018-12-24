@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Grpc.Extension.Client.LoadBalancer;
 
 
 namespace Grpc.Extension.Client
@@ -7,16 +8,15 @@ namespace Grpc.Extension.Client
 	public class ClientFactory
 	{
 
-		private LoadBalancer.ILoadBalancer GrpcLoadBalance { get; }
+		private ILoadBalancer GrpcLoadBalance { get; }
 
 		private GrpcClientConfiguration GrpcClientConfiguration { get; }
 
-		public ClientFactory(LoadBalancer.ILoadBalancer grpcLoadBalance, GrpcClientConfiguration grpcClientConfiguration)
+		public ClientFactory(ILoadBalancer grpcLoadBalance, GrpcClientConfiguration grpcClientConfiguration)
 		{
 			GrpcLoadBalance = grpcLoadBalance;
 			GrpcClientConfiguration = grpcClientConfiguration;
 		}
-
 
 
 		public T Get<T>(string serviceName)

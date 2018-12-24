@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Grpc.Core;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +22,11 @@ namespace Grpc.Extension.Server
 		public static T GetService<T>(this ServerCallContext context)
 		{
 			return context.GetServiceProvider().GetService<T>();
+		}
+
+		public static IEnumerable<T> GetServices<T>(this ServerCallContext context)
+		{
+			return context.GetServiceProvider().GetServices<T>();
 		}
 	}
 }
