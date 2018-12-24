@@ -6,9 +6,9 @@ namespace Grpc.Extension.Server
 {
 	public static class GrpcServerConfigurationExtension
 	{
-		public static GrpcServerConfiguration AddService<TService>(this GrpcServerConfiguration configure) where TService : class, IGrpcService
+		public static GrpcServerConfiguration AddService<TGrpcService>(this GrpcServerConfiguration configure) where TGrpcService : class, IGrpcService
 		{
-			configure.Services.Add(typeof(TService));
+			configure.Services.Add(typeof(TGrpcService));
 			return configure;
 		}
 

@@ -9,7 +9,7 @@ namespace Grpc.Extension.Client
 	{
 		public TimeSpan ChannelStatusCheckInterval { get; set; } = TimeSpan.FromSeconds(15);
 
-		internal Type GrpcLoadBalance { get; set; } = LoadBalance.GrpcLoadBalance.RoundRobin;
+		internal Type GrpcLoadBalance { get; set; } = LoadBalance.GrpcLoadBalance.Polling;
 
 		internal ConsulClientConfiguration ConsulClientConfiguration { get; set; }
 

@@ -3,13 +3,13 @@ using Grpc.Core;
 
 namespace Grpc.Extension.Client.LoadBalance
 {
-	public class GrpcLoadBalanceRound : GrpcLoadBalance
+	public class GrpcLoadBalancePolling : GrpcLoadBalance
 	{
 		protected ChannelFactory ChannelFactory { get; }
 
 		private int _index = -1;
 
-		public GrpcLoadBalanceRound(ChannelFactory channelFactory)
+		public GrpcLoadBalancePolling(ChannelFactory channelFactory)
 		{
 			ChannelFactory = channelFactory;
 		}
