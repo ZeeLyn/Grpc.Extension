@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Extension.Client;
-using Grpc.Extension.Client.LoadBalance;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Grpc.Client.Controllers

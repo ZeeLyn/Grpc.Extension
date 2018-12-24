@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Consul;
 using Grpc.Core;
+using Grpc.Extension.Client.LoadBalancer;
 
 namespace Grpc.Extension.Client
 {
@@ -9,7 +10,7 @@ namespace Grpc.Extension.Client
 	{
 		public TimeSpan ChannelStatusCheckInterval { get; set; } = TimeSpan.FromSeconds(15);
 
-		internal Type GrpcLoadBalance { get; set; } = LoadBalance.GrpcLoadBalance.Polling;
+		internal Type GrpcLoadBalance { get; set; } = ILoadBalancer.Polling;
 
 		internal ConsulClientConfiguration ConsulClientConfiguration { get; set; }
 

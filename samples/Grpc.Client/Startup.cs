@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Extension.Client;
-using Grpc.Extension.Client.LoadBalance;
+using Grpc.Extension.Client.LoadBalancer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -31,7 +31,7 @@ namespace Grpc.Client
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 			services.AddGrpcClient(options =>
 			{
-				options.AddLoadBalance(GrpcLoadBalance.Polling);
+				options.AddLoadBalance(ILoadBalancer.Polling);
 				options.AddConsul(client => { client.Address = new Uri("http://192.168.1.142:8500"); });
 				options.AddServiceCredentials("grpc-server", ChannelCredentials.Insecure);
 				options.ChannelStatusCheckInterval = TimeSpan.FromSeconds(15);

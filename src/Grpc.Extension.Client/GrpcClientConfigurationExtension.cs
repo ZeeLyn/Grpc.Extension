@@ -2,13 +2,13 @@
 using System.Linq;
 using Consul;
 using Grpc.Core;
-using Grpc.Extension.Client.LoadBalance;
+using Grpc.Extension.Client.LoadBalancer;
 
 namespace Grpc.Extension.Client
 {
 	public static class GrpcClientConfigurationExtension
 	{
-		public static GrpcClientConfiguration AddLoadBalance<TGrpcLoadBalance>(this GrpcClientConfiguration gRpcClientConfiguration) where TGrpcLoadBalance : GrpcLoadBalance
+		public static GrpcClientConfiguration AddLoadBalance<TGrpcLoadBalance>(this GrpcClientConfiguration gRpcClientConfiguration) where TGrpcLoadBalance : ILoadBalancer
 		{
 			gRpcClientConfiguration.GrpcLoadBalance = typeof(TGrpcLoadBalance);
 			return gRpcClientConfiguration;
@@ -16,7 +16,7 @@ namespace Grpc.Extension.Client
 
 		public static GrpcClientConfiguration AddLoadBalance(this GrpcClientConfiguration gRpcClientConfiguration, Type type)
 		{
-			if (!typeof(GrpcLoadBalance).IsAssignableFrom(type))
+			if (!typeof(ILoadBalancer).IsAssignableFrom(type))
 				throw new TypeUnloadedException($"Type {type} does not implement GrpcLoadBalance");
 			gRpcClientConfiguration.GrpcLoadBalance = type;
 			return gRpcClientConfiguration;

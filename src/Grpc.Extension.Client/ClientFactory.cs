@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Linq;
-using Grpc.Extension.Client.LoadBalance;
+
 
 namespace Grpc.Extension.Client
 {
 	public class ClientFactory
 	{
 
-		private GrpcLoadBalance GrpcLoadBalance { get; }
+		private LoadBalancer.ILoadBalancer GrpcLoadBalance { get; }
 
 		private GrpcClientConfiguration GrpcClientConfiguration { get; }
 
-		public ClientFactory(GrpcLoadBalance grpcLoadBalance, GrpcClientConfiguration grpcClientConfiguration)
+		public ClientFactory(LoadBalancer.ILoadBalancer grpcLoadBalance, GrpcClientConfiguration grpcClientConfiguration)
 		{
 			GrpcLoadBalance = grpcLoadBalance;
 			GrpcClientConfiguration = grpcClientConfiguration;

@@ -1,15 +1,15 @@
 ﻿using System.Linq;
 using Grpc.Core;
 
-namespace Grpc.Extension.Client.LoadBalance
+namespace Grpc.Extension.Client.LoadBalancer
 {
-	public class GrpcLoadBalancePolling : GrpcLoadBalance
+	public class LoadBalancerPolling : ILoadBalancer
 	{
 		protected ChannelFactory ChannelFactory { get; }
 
 		private int _index = -1;
 
-		public GrpcLoadBalancePolling(ChannelFactory channelFactory)
+		public LoadBalancerPolling(ChannelFactory channelFactory)
 		{
 			ChannelFactory = channelFactory;
 		}
@@ -22,7 +22,7 @@ namespace Grpc.Extension.Client.LoadBalance
 			{
 				var channels = ChannelFactory.GetChannels(serviceName);
 				if (!channels.Any())
-					throw new System.Exception("No service node");
+					throw new System.Exception($"Service {serviceName} did not find available nodes.");
 				_index++;
 				if (_index > channels.Count - 1)
 					_index = 0;
