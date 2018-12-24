@@ -8,9 +8,9 @@ namespace Grpc.Extension.Client
 {
 	public static class GrpcClientConfigurationExtension
 	{
-		public static GrpcClientConfiguration AddLoadBalance<T>(this GrpcClientConfiguration gRpcClientConfiguration) where T : GrpcLoadBalance
+		public static GrpcClientConfiguration AddLoadBalance<TGrpcLoadBalance>(this GrpcClientConfiguration gRpcClientConfiguration) where TGrpcLoadBalance : GrpcLoadBalance
 		{
-			gRpcClientConfiguration.GrpcLoadBalance = typeof(T);
+			gRpcClientConfiguration.GrpcLoadBalance = typeof(TGrpcLoadBalance);
 			return gRpcClientConfiguration;
 		}
 
@@ -46,9 +46,9 @@ namespace Grpc.Extension.Client
 			return gRpcClientConfiguration;
 		}
 
-		public static GrpcClientConfiguration AddClient<T>(this GrpcClientConfiguration gRpcClientConfiguration) where T : ClientBase
+		public static GrpcClientConfiguration AddClient<TClient>(this GrpcClientConfiguration gRpcClientConfiguration) where TClient : ClientBase
 		{
-			gRpcClientConfiguration.ClientTypes.Add(typeof(T));
+			gRpcClientConfiguration.ClientTypes.Add(typeof(TClient));
 			return gRpcClientConfiguration;
 		}
 	}

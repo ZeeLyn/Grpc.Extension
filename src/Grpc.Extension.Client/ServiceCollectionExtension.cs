@@ -9,7 +9,6 @@ namespace Grpc.Extension.Client
 		public static IServiceCollection AddGrpcClient(this IServiceCollection serviceCollection, Action<GrpcClientConfiguration> configuration)
 		{
 			var conf = new GrpcClientConfiguration();
-
 			serviceCollection.AddSingleton<ChannelFactory>();
 			serviceCollection.AddSingleton<ClientFactory>();
 			serviceCollection.AddSingleton(typeof(GrpcLoadBalance), conf.GrpcLoadBalance);
