@@ -23,7 +23,7 @@ namespace Grpc.Extension.Client
 		{
 			var type = GrpcClientConfiguration.ClientTypes.FirstOrDefault(p => p == typeof(T));
 			if (type == null)
-				throw new InvalidOperationException();
+				throw new InvalidOperationException($"Not found client {typeof(T)}.");
 			var channel = GrpcLoadBalance.GetNextChannel(serviceName);
 			return (T)Activator.CreateInstance(type, channel);
 		}
