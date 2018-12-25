@@ -15,7 +15,7 @@ namespace Grpc.Extension.Server
 
 		internal Dictionary<Type, List<Type>> Services { get; set; } = new Dictionary<Type, List<Type>>();
 
-		internal int Weighted { get; set; }
+		internal int Weight { get; set; }
 	}
 
 	public class ConsulAgentServiceConfiguration
@@ -33,8 +33,6 @@ namespace Grpc.Extension.Server
 		public Dictionary<string, string> Meta { get; set; }
 
 		public string[] Tags { get; set; }
-
-		//public (string Host, int Port)? HealthCheck { get; set; }
 
 		public TimeSpan HealthCheckInterval { get; set; } = TimeSpan.FromSeconds(10);
 	}

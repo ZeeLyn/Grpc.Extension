@@ -30,10 +30,16 @@ namespace Grpc.Extension.Server
 		}
 
 		public static GrpcServerConfiguration AddServerPort(this GrpcServerConfiguration configure, string host,
-			int port, ServerCredentials serverCredentials, int weighted = 0)
+			int port, ServerCredentials serverCredentials, int? weight)
 		{
 			configure.ServerPort = new ServerPort(host, port, serverCredentials);
-			configure.Weighted = weighted;
+			if (weight.HasValue)
+			{
+				if (weight.Value <= 0)
+					throw new ArgumentException("The weighted value must be greater than 0");
+				configure.Weight = weight.Value;
+			}
+
 			return configure;
 		}
 

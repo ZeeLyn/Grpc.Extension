@@ -75,6 +75,7 @@ namespace Grpc.Extension.Client
 									if (channel.Status == ChannelNodeStatus.Critical)
 										continue;
 									channel.Status = ChannelNodeStatus.Critical;
+									channel.CurrentWeight = 0;
 									Logger.LogInformation($"The status of node {channel.Address}:{channel.Port} changes to critical.");
 								}
 							}

@@ -104,7 +104,7 @@ namespace Grpc.Extension.Server
 						//Register service to consul agent 
 						if (configure.AgentServiceConfiguration.Meta == null)
 							configure.AgentServiceConfiguration.Meta = new Dictionary<string, string>();
-						configure.AgentServiceConfiguration.Meta.Add("X-Weight", configure.Weighted.ToString());
+						configure.AgentServiceConfiguration.Meta.Add("X-Weight", configure.Weight.ToString());
 						var result = consul.Agent
 							.ServiceRegister(configure.AgentServiceConfiguration, CancellationTokenSource.Token)
 							.GetAwaiter().GetResult();
