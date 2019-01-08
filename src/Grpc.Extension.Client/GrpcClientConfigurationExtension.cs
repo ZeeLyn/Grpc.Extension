@@ -30,6 +30,7 @@ namespace Grpc.Extension.Client
 		}
 
 
+
 		public static GrpcClientConfiguration AddServiceCredentials(this GrpcClientConfiguration gRpcClientConfiguration, string serviceName, ChannelCredentials channelCredentials)
 		{
 			if (string.IsNullOrWhiteSpace(serviceName))

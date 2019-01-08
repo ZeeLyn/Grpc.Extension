@@ -15,9 +15,12 @@ namespace Grpc.Client.Controllers
 
 		private ClientFactory ClientFactory { get; }
 
-		public ValuesController(ClientFactory clientFactory)
+		private GrpcService GrpcService { get; }
+
+		public ValuesController(ClientFactory clientFactory, GrpcService grpcService)
 		{
 			ClientFactory = clientFactory;
+			GrpcService = grpcService;
 		}
 
 		// GET api/values
@@ -26,7 +29,8 @@ namespace Grpc.Client.Controllers
 		{
 			//var ch = new Channel("192.168.1.129", 50054, ChannelCredentials.Insecure);
 			//var client = new Hello.HelloClient(ch);
-
+			GrpcService.Client<Hello.HelloClient, HelloReply>("", c => { return c.SayHello(new HelloRequest()); });
+			ClientFactory.Get<Hello.HelloClient>("grpc-server").Invok();
 			var client = ClientFactory.Get<Hello.HelloClient>("grpc-server");
 			return Ok(client.SayHello(new HelloRequest
 			{

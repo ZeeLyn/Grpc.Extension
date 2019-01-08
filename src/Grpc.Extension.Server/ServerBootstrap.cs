@@ -6,6 +6,7 @@ using System.Threading;
 using Consul;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
+using Grpc.Extension.Server.ServiceDiscovery;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,7 +33,7 @@ namespace Grpc.Extension.Server
 				var configure = app.ApplicationServices.GetService<GrpcServerConfiguration>();
 				if (configure.ServerPort == null)
 					throw new ArgumentNullException(nameof(configure.ServerPort));
-
+				var discovery = app.ApplicationServices.GetService<IServiceDiscovery>();
 				Logger.LogInformation("---------------> Grpc server is starting...");
 
 				var server = new Core.Server
@@ -57,27 +58,21 @@ namespace Grpc.Extension.Server
 				//Register health check service
 				server.Services.Add(Health.V1.Health.BindService(app.ApplicationServices.GetService<HealthCheckService.HealthCheckService>()));
 
-				//Stop service
-				applicationLifetime.ApplicationStopping.Register(() =>
-				{
-					CancellationTokenSource.Cancel();
-					server.ShutdownAsync().GetAwaiter().GetResult();
-					using (var consul = new ConsulClient(conf =>
-					{
-						conf.Address = configure.ConsulClientConfiguration.Address;
-					}))
-					{
-						consul.Agent.ServiceDeregister(configure.AgentServiceConfiguration.ID)
-							.GetAwaiter().GetResult();
-					}
 
-				});
+
+				//Stop service
+				applicationLifetime.ApplicationStopping.Register(async () =>
+			   {
+				   CancellationTokenSource.Cancel();
+				   await discovery.DeregisterAsync(configure.DiscoveryClientConfiguration, configure.DiscoveryServiceConfiguration);
+				   await server.ShutdownAsync();
+			   });
 
 				server.Start();
 
 				Logger.LogInformation("---------------> Grpc server has started");
 
-				if (configure.AgentServiceConfiguration != null)
+				if (configure.DiscoveryServiceConfiguration != null)
 				{
 					Logger.LogInformation("---------------> Start registering consul service...");
 
@@ -93,28 +88,30 @@ namespace Grpc.Extension.Server
 					//	});
 					//}
 
-					using (var consul = new ConsulClient(conf =>
-					{
-						conf.Address = configure.ConsulClientConfiguration.Address;
-						conf.Datacenter = configure.ConsulClientConfiguration.Datacenter;
-						conf.Token = configure.ConsulClientConfiguration.Token;
-						conf.WaitTime = configure.ConsulClientConfiguration.WaitTime;
-					}))
-					{
-						//Register service to consul agent 
-						if (configure.AgentServiceConfiguration.Meta == null)
-							configure.AgentServiceConfiguration.Meta = new Dictionary<string, string>();
-						configure.AgentServiceConfiguration.Meta.Add("X-Weight", configure.Weight.ToString());
-						var result = consul.Agent
-							.ServiceRegister(configure.AgentServiceConfiguration, CancellationTokenSource.Token)
-							.GetAwaiter().GetResult();
-						if (result.StatusCode != HttpStatusCode.OK)
-						{
-							Logger.LogError("--------------->  Registration service failed:{0}", result.StatusCode);
-							throw new ConsulRequestException("Registration service failed.", result.StatusCode);
-						}
-						Logger.LogInformation("---------------> Consul service registration completed");
-					}
+					discovery.RegisterAsync(configure.DiscoveryClientConfiguration, configure.DiscoveryServiceConfiguration, configure.Weight).GetAwaiter().GetResult();
+
+					//using (var consul = new ConsulClient(conf =>
+					//{
+					//	conf.Address = configure.DiscoveryClientConfiguration.Address;
+					//	conf.Datacenter = configure.DiscoveryClientConfiguration.Datacenter;
+					//	conf.Token = configure.DiscoveryClientConfiguration.Token;
+					//	conf.WaitTime = configure.DiscoveryClientConfiguration.WaitTime;
+					//}))
+					//{
+					//	//Register service to consul agent 
+					//	if (configure.DiscoveryServiceConfiguration.Meta == null)
+					//		configure.DiscoveryServiceConfiguration.Meta = new Dictionary<string, string>();
+					//	configure.DiscoveryServiceConfiguration.Meta.Add("X-Weight", configure.Weight.ToString());
+					//	var result = consul.Agent
+					//		.ServiceRegister(configure.DiscoveryServiceConfiguration, CancellationTokenSource.Token)
+					//		.GetAwaiter().GetResult();
+					//	if (result.StatusCode != HttpStatusCode.OK)
+					//	{
+					//		Logger.LogError("--------------->  Registration service failed:{0}", result.StatusCode);
+					//		throw new ConsulRequestException("Registration service failed.", result.StatusCode);
+					//	}
+					//	Logger.LogInformation("---------------> Consul service registration completed");
+					//}
 				}
 			}
 			catch (Exception ex)

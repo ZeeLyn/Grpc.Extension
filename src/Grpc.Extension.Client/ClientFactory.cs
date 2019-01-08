@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Grpc.Core;
 using Grpc.Extension.Client.LoadBalancer;
 
 
@@ -19,13 +20,13 @@ namespace Grpc.Extension.Client
 		}
 
 
-		public T Get<T>(string serviceName)
+		public TGrpcClient Get<TGrpcClient>(string serviceName) where TGrpcClient : ClientBase
 		{
-			var type = GrpcClientConfiguration.ClientTypes.FirstOrDefault(p => p == typeof(T));
+			var type = GrpcClientConfiguration.ClientTypes.FirstOrDefault(p => p == typeof(TGrpcClient));
 			if (type == null)
-				throw new InvalidOperationException($"Not found client {typeof(T)}.");
+				throw new InvalidOperationException($"Not found client {typeof(TGrpcClient)}.");
 			var channel = GrpcLoadBalance.GetNextChannel(serviceName);
-			return (T)Activator.CreateInstance(type, channel);
+			return (TGrpcClient)Activator.CreateInstance(type, channel);
 		}
 	}
 }
