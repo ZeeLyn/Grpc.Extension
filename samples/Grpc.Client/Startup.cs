@@ -36,6 +36,7 @@ namespace Grpc.Client
 				options.AddServiceCredentials("grpc-server", ChannelCredentials.Insecure);
 				options.ChannelStatusCheckInterval = TimeSpan.FromSeconds(15);
 				options.AddClient<Hello.HelloClient>();
+				options.AddCircuitBreaker(conf => { conf.InvokeTimeout = TimeSpan.FromSeconds(1); });
 			});
 		}
 

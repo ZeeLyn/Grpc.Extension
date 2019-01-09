@@ -29,6 +29,8 @@ namespace Grpc.Extension.Client
 				CancellationTokenSource.Cancel();
 			});
 
+
+
 			Task.Factory.StartNew(async () =>
 			{
 				while (!CancellationTokenSource.Token.IsCancellationRequested)

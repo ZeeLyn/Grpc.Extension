@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Grpc.Core;
+using Grpc.Extension.Client.CircuitBreaker;
 using Grpc.Extension.Client.LoadBalancer;
 
 
@@ -13,10 +14,16 @@ namespace Grpc.Extension.Client
 
 		private GrpcClientConfiguration GrpcClientConfiguration { get; }
 
-		public ClientFactory(ILoadBalancer grpcLoadBalance, GrpcClientConfiguration grpcClientConfiguration)
+		private CircuitBreakerPolicy CircuitBreakerPolicy { get; }
+
+		//private CircuitBreakerCallInvoker CircuitBreakerCallInvoker { get; }
+
+		public ClientFactory(ILoadBalancer grpcLoadBalance, GrpcClientConfiguration grpcClientConfiguration, CircuitBreakerPolicy circuitBreakerPolicy)
 		{
 			GrpcLoadBalance = grpcLoadBalance;
 			GrpcClientConfiguration = grpcClientConfiguration;
+			CircuitBreakerPolicy = circuitBreakerPolicy;
+			//CircuitBreakerCallInvoker = circuitBreakerCallInvoker;
 		}
 
 
@@ -26,7 +33,8 @@ namespace Grpc.Extension.Client
 			if (type == null)
 				throw new InvalidOperationException($"Not found client {typeof(TGrpcClient)}.");
 			var channel = GrpcLoadBalance.GetNextChannel(serviceName);
-			return (TGrpcClient)Activator.CreateInstance(type, channel);
+			var call = new CircuitBreakerCallInvoker(channel, CircuitBreakerPolicy, GrpcClientConfiguration);
+			return (TGrpcClient)Activator.CreateInstance(type, call);
 		}
 	}
 }

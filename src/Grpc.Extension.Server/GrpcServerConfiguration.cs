@@ -16,30 +16,8 @@ namespace Grpc.Extension.Server
 
 		internal IClientConfiguration DiscoveryClientConfiguration { get; set; }
 
-		//internal Type ServiceDiscovery { get; set; }
-
 		internal Dictionary<Type, List<Type>> Services { get; set; } = new Dictionary<Type, List<Type>>();
 
 		internal int? Weight { get; set; }
 	}
-
-	public class ConsulAgentServiceConfiguration
-	{
-		public string Address { get; set; }
-
-		public int Port { get; set; }
-
-		public string ServiceId { get; set; }
-
-		public string ServiceName { get; set; }
-
-		public bool EnableTagOverride { get; set; }
-
-		public Dictionary<string, string> Meta { get; set; }
-
-		public string[] Tags { get; set; }
-
-		public TimeSpan HealthCheckInterval { get; set; } = TimeSpan.FromSeconds(10);
-	}
-
 }

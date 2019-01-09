@@ -11,6 +11,7 @@ namespace Grpc.Server.WebApp
 		{
 			var rs = context.GetService<RepertoryService>();
 			var conf = context.GetService<IConfiguration>();
+			await Task.Delay(3000);
 			return await Task.FromResult(new HelloReply { Message = $"Port:{conf.GetSection("GrpcServer:Port").Get<int>()}:{rs.GetGuid()} Hello " + request.Name });
 		}
 	}

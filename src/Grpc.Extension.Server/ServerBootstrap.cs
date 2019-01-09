@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading;
-using Consul;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
 using Grpc.Extension.Server.ServiceDiscovery;
@@ -16,13 +13,11 @@ namespace Grpc.Extension.Server
 {
 	public class ServerBootstrap : IDisposable
 	{
-		private CancellationTokenSource CancellationTokenSource { get; }
 
 		private ILogger Logger { get; }
 
 		public ServerBootstrap(ILogger<ServerBootstrap> logger)
 		{
-			CancellationTokenSource = new CancellationTokenSource();
 			Logger = logger;
 		}
 		public void Start(IApplicationBuilder app)
@@ -63,7 +58,6 @@ namespace Grpc.Extension.Server
 				//Stop service
 				applicationLifetime.ApplicationStopping.Register(async () =>
 			   {
-				   CancellationTokenSource.Cancel();
 				   await discovery.DeregisterAsync(configure.DiscoveryClientConfiguration, configure.DiscoveryServiceConfiguration);
 				   await server.ShutdownAsync();
 			   });
@@ -76,42 +70,7 @@ namespace Grpc.Extension.Server
 				{
 					Logger.LogInformation("---------------> Start registering consul service...");
 
-					//if (configure.AgentServiceConfiguration.Check != null)
-					//{
-					//	app.Map("/grpc/server/health/check", builder =>
-					//	{
-					//		builder.Run(async handler =>
-					//		{
-					//			handler.Response.StatusCode = (int)HttpStatusCode.OK;
-					//			await handler.Response.WriteAsync($"{{\"Status\":\"{HttpStatusCode.OK}\"}}");
-					//		});
-					//	});
-					//}
-
 					discovery.RegisterAsync(configure.DiscoveryClientConfiguration, configure.DiscoveryServiceConfiguration, configure.Weight).GetAwaiter().GetResult();
-
-					//using (var consul = new ConsulClient(conf =>
-					//{
-					//	conf.Address = configure.DiscoveryClientConfiguration.Address;
-					//	conf.Datacenter = configure.DiscoveryClientConfiguration.Datacenter;
-					//	conf.Token = configure.DiscoveryClientConfiguration.Token;
-					//	conf.WaitTime = configure.DiscoveryClientConfiguration.WaitTime;
-					//}))
-					//{
-					//	//Register service to consul agent 
-					//	if (configure.DiscoveryServiceConfiguration.Meta == null)
-					//		configure.DiscoveryServiceConfiguration.Meta = new Dictionary<string, string>();
-					//	configure.DiscoveryServiceConfiguration.Meta.Add("X-Weight", configure.Weight.ToString());
-					//	var result = consul.Agent
-					//		.ServiceRegister(configure.DiscoveryServiceConfiguration, CancellationTokenSource.Token)
-					//		.GetAwaiter().GetResult();
-					//	if (result.StatusCode != HttpStatusCode.OK)
-					//	{
-					//		Logger.LogError("--------------->  Registration service failed:{0}", result.StatusCode);
-					//		throw new ConsulRequestException("Registration service failed.", result.StatusCode);
-					//	}
-					//	Logger.LogInformation("---------------> Consul service registration completed");
-					//}
 				}
 			}
 			catch (Exception ex)
@@ -123,7 +82,6 @@ namespace Grpc.Extension.Server
 
 		public void Dispose()
 		{
-			CancellationTokenSource.Cancel();
 		}
 	}
 }

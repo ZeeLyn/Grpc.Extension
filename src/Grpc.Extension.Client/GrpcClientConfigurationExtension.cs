@@ -54,5 +54,13 @@ namespace Grpc.Extension.Client
 			gRpcClientConfiguration.ClientTypes.Add(typeof(TClient));
 			return gRpcClientConfiguration;
 		}
+
+		public static GrpcClientConfiguration AddCircuitBreaker(this GrpcClientConfiguration gRpcClientConfiguration, Action<CircuitBreakerOption> action)
+		{
+			var option = new CircuitBreakerOption();
+			action?.Invoke(option);
+			gRpcClientConfiguration.CircuitBreakerOption = option;
+			return gRpcClientConfiguration;
+		}
 	}
 }
