@@ -1,5 +1,4 @@
-﻿using System;
-using Grpc.Core;
+﻿using Grpc.Core;
 using Grpc.Core.Utils;
 
 namespace Grpc.Extension.Client.CircuitBreaker
@@ -11,6 +10,7 @@ namespace Grpc.Extension.Client.CircuitBreaker
 
 		private GrpcClientConfiguration GrpcClientConfiguration { get; }
 
+
 		public CircuitBreakerCallInvoker(Channel channel, CircuitBreakerPolicy circuitBreakerPolicy, GrpcClientConfiguration grpcClientConfiguration)
 		{
 			Channel = GrpcPreconditions.CheckNotNull(channel);
@@ -21,11 +21,9 @@ namespace Grpc.Extension.Client.CircuitBreaker
 		public override TResponse BlockingUnaryCall<TRequest, TResponse>(Method<TRequest, TResponse> method, string host, CallOptions options, TRequest request)
 		{
 			var call = CreateCall(method, host, options);
-
 			if (GrpcClientConfiguration.CircuitBreakerOption != null)
 			{
 				var policy = CircuitBreakerPolicy.GetOrCreatePolicy<TResponse>($"{call.Channel.Target}/{call.Method}");
-
 				return policy.Execute(() => Calls.BlockingUnaryCall(call, request));
 			}
 			return Calls.BlockingUnaryCall(call, request);

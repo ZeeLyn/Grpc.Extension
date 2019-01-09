@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Grpc.Extension.Server\Grpc.Extension.Server.csproj" />
+    <ProjectReference Include="..\Grpc.ServiceInterface\Grpc.ServiceInterface.csproj" />
     <ProjectReference Include="..\Grpc.Statement\Grpc.Statement.csproj" />
   </ItemGroup>
 

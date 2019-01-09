@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grpc.Server.Console", "samp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grpc.Server.WebApp", "samples\Grpc.Server.WebApp\Grpc.Server.WebApp.csproj", "{07BB3BEE-A198-49E9-9DBD-B57E028376E7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grpc.ServiceInterface", "samples\Grpc.ServiceInterface\Grpc.ServiceInterface.csproj", "{BD4AA73B-2561-45FE-A0FD-898095359A18}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +51,10 @@ Global
 		{07BB3BEE-A198-49E9-9DBD-B57E028376E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{07BB3BEE-A198-49E9-9DBD-B57E028376E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{07BB3BEE-A198-49E9-9DBD-B57E028376E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD4AA73B-2561-45FE-A0FD-898095359A18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD4AA73B-2561-45FE-A0FD-898095359A18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD4AA73B-2561-45FE-A0FD-898095359A18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD4AA73B-2561-45FE-A0FD-898095359A18}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -60,6 +66,7 @@ Global
 		{14EBBEB4-EDB4-4E44-82F2-81277E0FF64A} = {6B81CBBB-DBF5-4594-8911-C706A9E179A0}
 		{40F31FD0-DD1B-48A6-8875-E10035C26387} = {6B81CBBB-DBF5-4594-8911-C706A9E179A0}
 		{07BB3BEE-A198-49E9-9DBD-B57E028376E7} = {6B81CBBB-DBF5-4594-8911-C706A9E179A0}
+		{BD4AA73B-2561-45FE-A0FD-898095359A18} = {6B81CBBB-DBF5-4594-8911-C706A9E179A0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8E9CBB20-3182-488B-950A-2F79F5DC29B9}

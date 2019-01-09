@@ -11,7 +11,7 @@ namespace Grpc.Extension.Server
 			configure?.Invoke(conf);
 			serviceCollection.AddSingleton(conf);
 			serviceCollection.AddSingleton<ServerBootstrap>();
-			serviceCollection.AddSingleton<HealthCheckService.HealthCheckService>();
+			//serviceCollection.AddSingleton<HealthCheckService.HealthCheckService>();
 			serviceCollection.AddScoped<ServiceProviderMetadataEntry>();
 			return serviceCollection;
 		}

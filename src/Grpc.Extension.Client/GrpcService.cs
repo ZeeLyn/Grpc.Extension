@@ -11,10 +11,6 @@ namespace Grpc.Extension.Client
 			ClientFactory = clientFactory;
 		}
 
-		public TResult Client<TClient, TResult>(string serviceName, Func<TClient, TResult> func) where TClient : ClientBase
-		{
-			var client = ClientFactory.Get<TClient>(serviceName);
-			return func(client);
-		}
+
 	}
 }

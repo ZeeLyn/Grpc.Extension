@@ -33,15 +33,6 @@ namespace Grpc.Server.WebApp
 			{
 				configure.AddServerPort(Configuration.GetSection("GrpcServer:Host").Get<string>(),
 					Configuration.GetSection("GrpcServer:Port").Get<int>(), ServerCredentials.Insecure);
-				//configure.AddConsul(
-				//	client => { client.Address = new Uri("http://192.168.1.142:8500"); },
-				//	service =>
-				//	{
-				//		service.Address = Configuration.GetSection("GrpcServer:Host").Get<string>();
-				//		service.Port = Configuration.GetSection("GrpcServer:Port").Get<int>();
-				//		service.ServiceName = "grpc-server";
-				//		service.HealthCheckInterval = TimeSpan.FromSeconds(10);
-				//	});
 				configure.AddServiceDiscovery<ConsulServiceDiscovery>(
 					new ConsulConfiguration("http://192.168.1.142:8500"),
 					new ConsulServiceConfiguration
@@ -51,7 +42,6 @@ namespace Grpc.Server.WebApp
 						ServiceName = "grpc-server",
 						HealthCheckInterval = TimeSpan.FromSeconds(10)
 					}, Configuration.GetSection("GrpcServer:Weight").Get<int>());
-				configure.AddService<HelloService>();
 			});
 		}
 

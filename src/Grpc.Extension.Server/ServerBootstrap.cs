@@ -4,6 +4,7 @@ using System.Threading;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
 using Grpc.Extension.Server.ServiceDiscovery;
+using MagicOnion.Server;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,27 +32,29 @@ namespace Grpc.Extension.Server
 				var discovery = app.ApplicationServices.GetService<IServiceDiscovery>();
 				Logger.LogInformation("---------------> Grpc server is starting...");
 
+				var services = MagicOnionEngine.BuildServerServiceDefinition(true);
 				var server = new Core.Server
 				{
-					Ports = { configure.ServerPort }
+					Ports = { configure.ServerPort },
+					Services = { services.ServerServiceDefinition.Intercept(new DependencyInjectionInterceptor(app.ApplicationServices)) }
 				};
 
 				//Register grpc service
-				foreach (var service in configure.Services)
-				{
-					var bindMethod = service.Key.BaseType?.DeclaringType?.GetMethods().FirstOrDefault(p =>
-						p.Name == "BindService" && p.ReturnType == typeof(ServerServiceDefinition) && p.IsPublic);
-					if (bindMethod == null)
-						throw new InvalidOperationException($"Type {service.Key.Name} is not a grpc service");
-					var serviceInstance = Activator.CreateInstance(service.Key);
-					var binder = bindMethod.Invoke(null, new[] { serviceInstance }) as ServerServiceDefinition;
-					var interceptors = service.Value.Select(p => (Interceptor)Activator.CreateInstance(p)).ToArray();
-					server.Services.Add(binder.Intercept(new DependencyInjectionInterceptor(app.ApplicationServices))
-						.Intercept(interceptors));
-				}
+				//foreach (var service in configure.Services)
+				//{
+				//	var bindMethod = service.Key.BaseType?.DeclaringType?.GetMethods().FirstOrDefault(p =>
+				//		p.Name == "BindService" && p.ReturnType == typeof(ServerServiceDefinition) && p.IsPublic);
+				//	if (bindMethod == null)
+				//		throw new InvalidOperationException($"Type {service.Key.Name} is not a grpc service");
+				//	var serviceInstance = Activator.CreateInstance(service.Key);
+				//	var binder = bindMethod.Invoke(null, new[] { serviceInstance }) as ServerServiceDefinition;
+				//	var interceptors = service.Value.Select(p => (Interceptor)Activator.CreateInstance(p)).ToArray();
+				//	server.Services.Add(binder.Intercept(new DependencyInjectionInterceptor(app.ApplicationServices))
+				//		.Intercept(interceptors));
+				//}
 
 				//Register health check service
-				server.Services.Add(Health.V1.Health.BindService(app.ApplicationServices.GetService<HealthCheckService.HealthCheckService>()));
+				//server.Services.Add(Health.V1.Health.BindService(app.ApplicationServices.GetService<HealthCheckService.HealthCheckService>()));
 
 
 

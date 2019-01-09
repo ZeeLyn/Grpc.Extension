@@ -3,6 +3,8 @@ using System.Linq;
 using Grpc.Core;
 using Grpc.Extension.Client.CircuitBreaker;
 using Grpc.Extension.Client.LoadBalancer;
+using MagicOnion;
+using MagicOnion.Client;
 
 
 namespace Grpc.Extension.Client
@@ -27,14 +29,18 @@ namespace Grpc.Extension.Client
 		}
 
 
-		public TGrpcClient Get<TGrpcClient>(string serviceName) where TGrpcClient : ClientBase
+		public TService Get<TService>(string serviceName) where TService : IService<TService>
 		{
-			var type = GrpcClientConfiguration.ClientTypes.FirstOrDefault(p => p == typeof(TGrpcClient));
-			if (type == null)
-				throw new InvalidOperationException($"Not found client {typeof(TGrpcClient)}.");
+			//var type = GrpcClientConfiguration.ClientTypes.FirstOrDefault(p => p == typeof(TGrpcClient));
+			//if (type == null)
+			//	throw new InvalidOperationException($"Not found client {typeof(TGrpcClient)}.");
+			//var channel = GrpcLoadBalance.GetNextChannel(serviceName);
+			//var call = new CircuitBreakerCallInvoker(channel, CircuitBreakerPolicy, GrpcClientConfiguration);
+			//return (TGrpcClient)Activator.CreateInstance(type, call);
+
 			var channel = GrpcLoadBalance.GetNextChannel(serviceName);
-			var call = new CircuitBreakerCallInvoker(channel, CircuitBreakerPolicy, GrpcClientConfiguration);
-			return (TGrpcClient)Activator.CreateInstance(type, call);
+			var caller = new CircuitBreakerCallInvoker(channel, CircuitBreakerPolicy, GrpcClientConfiguration);
+			return MagicOnionClient.Create<TService>(caller);
 		}
 	}
 }

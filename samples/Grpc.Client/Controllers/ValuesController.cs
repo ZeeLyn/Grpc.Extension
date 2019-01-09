@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Extension.Client;
+using Grpc.ServiceInterface;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Grpc.Client.Controllers
@@ -25,17 +26,14 @@ namespace Grpc.Client.Controllers
 
 		// GET api/values
 		[HttpGet]
-		public IActionResult Get()
+		public async Task<IActionResult> Get()
 		{
 			//var ch = new Channel("192.168.1.129", 50054, ChannelCredentials.Insecure);
 			//var client = new Hello.HelloClient(ch);
 			//GrpcService.Client<Hello.HelloClient, HelloReply>("", c => { return c.SayHello(new HelloRequest()); });
 			//ClientFactory.Get<Hello.HelloClient>("grpc-server").Invok();
-			var client = ClientFactory.Get<Hello.HelloClient>("grpc-server");
-			return Ok(client.SayHello(new HelloRequest
-			{
-				Name = "Owen"
-			}));
+			var client = ClientFactory.Get<IHelloService>("grpc-server");
+			return Ok(await client.Say("owen"));
 		}
 
 		// GET api/values/5
