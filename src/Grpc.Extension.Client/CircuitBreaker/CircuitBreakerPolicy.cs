@@ -93,11 +93,17 @@ namespace Grpc.Extension.Client.CircuitBreaker
 					policy = policy.Wrap(Policy.Timeout(CircuitBreakerOption.InvokeTimeout, TimeoutStrategy.Pessimistic));
 				}
 
+				//if (CircuitBreakerOption.Retry > 0)
+				//{
+				//	policy = policy.Wrap(Policy.Handle<BrokenCircuitException>()
+				//		.Or<TimeoutRejectedException>().Or<Exception>().Retry(CircuitBreakerOption.Retry));
+				//}
+
 				if (CircuitBreakerOption.ExceptionsAllowedBeforeBreaking > 0)
 				{
 					policy = policy.Wrap(Policy<AsyncUnaryCall<TResponse>>.Handle<TimeoutRejectedException>().Or<Exception>()
 						.CircuitBreaker(CircuitBreakerOption.ExceptionsAllowedBeforeBreaking,
-							CircuitBreakerOption.DurationOfBreak));
+							CircuitBreakerOption.DurationOfBreak, (r, ts) => { Console.WriteLine("breaker------------------------"); }, () => { }));
 				}
 
 				return policy;

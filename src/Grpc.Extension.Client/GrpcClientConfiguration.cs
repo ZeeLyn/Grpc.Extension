@@ -31,7 +31,7 @@ namespace Grpc.Extension.Client
 		/// <summary>
 		/// The number of exceptions or handled results that are allowed before opening the circuit.
 		/// </summary>
-		public int ExceptionsAllowedBeforeBreaking { get; set; } = 10;
+		public int ExceptionsAllowedBeforeBreaking { get; set; } = 3;
 
 		/// <summary>
 		/// The duration the circuit will stay open before resetting.
@@ -43,31 +43,6 @@ namespace Grpc.Extension.Client
 		/// </summary>
 		public TimeSpan InvokeTimeout { get; set; }
 
-		/// <summary>
-		/// Filtered exception type
-		/// </summary>
-		public IEnumerable<Type> Exceptions { get; set; } = new List<Type> { };
-
-		/// <summary>
-		/// The exception predicate
-		/// </summary>
-		public Func<Exception, bool> ExceptionPredicate { get; set; }
-
-		public Action<Exception, Context, CancellationToken> OnFallback { get; set; }
-
-		/// <summary>
-		/// The action to call asynchronously before invoking the fallback delegate.
-		/// </summary>
-		public Action<Exception, Context> OnFallbackBefore { get; set; }
-
-		/// <summary>
-		/// The action to call when the circuit transitions to an <see cref="CircuitState.Open" /> state.
-		/// </summary>
-		public Action<Exception, TimeSpan, Context> OnBreak { get; set; }
-
-		/// <summary>
-		/// The action to call when the circuit resets to a <see cref="CircuitState.Closed" /> state.
-		/// </summary>
-		public Action<Context> OnReset { get; set; }
+		public int Retry { get; set; }
 	}
 }
