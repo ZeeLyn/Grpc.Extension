@@ -1,4 +1,5 @@
 ﻿using System;
+using Grpc.Extension.Core;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Grpc.Extension.Server
@@ -10,8 +11,7 @@ namespace Grpc.Extension.Server
 			var conf = new GrpcServerConfiguration { ServiceCollection = serviceCollection };
 			configure?.Invoke(conf);
 			serviceCollection.AddSingleton(conf);
-			serviceCollection.AddSingleton<ServerBootstrap>();
-			//serviceCollection.AddSingleton<HealthCheckService.HealthCheckService>();
+			serviceCollection.AddSingleton<IServerBootstrap, ServerBootstrap>();
 			serviceCollection.AddScoped<ServiceProviderMetadataEntry>();
 			return serviceCollection;
 		}

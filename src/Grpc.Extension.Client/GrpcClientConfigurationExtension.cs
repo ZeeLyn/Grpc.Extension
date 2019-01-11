@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Linq;
-using Consul;
 using Grpc.Core;
 using Grpc.Extension.Client.LoadBalancer;
+using Grpc.Extension.Core;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Grpc.Extension.Client
 {
@@ -22,11 +22,20 @@ namespace Grpc.Extension.Client
 			return gRpcClientConfiguration;
 		}
 
-		public static GrpcClientConfiguration AddConsul(this GrpcClientConfiguration gRpcClientConfiguration, Action<ConsulClientConfiguration> action)
+
+		public static GrpcClientConfiguration AddServiceDiscovery<TDiscovery>(
+			this GrpcClientConfiguration gRpcClientConfiguration, IClientConfiguration clientConfiguration) where TDiscovery : IServiceDiscovery
 		{
-			gRpcClientConfiguration.ConsulClientConfiguration = new ConsulClientConfiguration();
-			action?.Invoke(gRpcClientConfiguration.ConsulClientConfiguration);
+			gRpcClientConfiguration.ConsulClientConfiguration = clientConfiguration;
+			gRpcClientConfiguration.ServiceCollection.AddSingleton(typeof(IServiceDiscovery), typeof(TDiscovery));
 			return gRpcClientConfiguration;
+		}
+
+		public static GrpcClientConfiguration AddConsulServiceDiscovery(this GrpcClientConfiguration gRpcClientConfiguration, Action<ConsulConfiguration> action)
+		{
+			var client = new ConsulConfiguration();
+			action?.Invoke(client);
+			return gRpcClientConfiguration.AddServiceDiscovery<ConsulServiceDiscovery>(client);
 		}
 
 
@@ -39,21 +48,6 @@ namespace Grpc.Extension.Client
 			return gRpcClientConfiguration;
 		}
 
-
-		public static GrpcClientConfiguration AddClient(this GrpcClientConfiguration gRpcClientConfiguration,
-			params Type[] types)
-		{
-			if (types.Any(p => !typeof(ClientBase).IsAssignableFrom(p)))
-				throw new InvalidOperationException("The added type is not a grpc client implementation.");
-			gRpcClientConfiguration.ClientTypes.AddRange(types);
-			return gRpcClientConfiguration;
-		}
-
-		public static GrpcClientConfiguration AddClient<TClient>(this GrpcClientConfiguration gRpcClientConfiguration) where TClient : ClientBase
-		{
-			gRpcClientConfiguration.ClientTypes.Add(typeof(TClient));
-			return gRpcClientConfiguration;
-		}
 
 		public static GrpcClientConfiguration AddCircuitBreaker(this GrpcClientConfiguration gRpcClientConfiguration, Action<CircuitBreakerOption> action)
 		{

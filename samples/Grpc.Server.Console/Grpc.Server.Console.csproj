@@ -17,7 +17,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Grpc.Extension.Client\Grpc.Extension.Client.csproj" />
     <ProjectReference Include="..\..\src\Grpc.Extension.Server\Grpc.Extension.Server.csproj" />
-    <ProjectReference Include="..\Grpc.Statement\Grpc.Statement.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -5,11 +5,11 @@ namespace Grpc.Extension.Client.LoadBalancer
 {
 	public class LoadBalancerWeightedPolling : ILoadBalancer
 	{
-		internal ChannelFactory ChannelFactory { get; }
+		internal IChannelFactory ChannelFactory { get; }
 
 		private static readonly object LockObject = new object();
 
-		public LoadBalancerWeightedPolling(ChannelFactory channelFactory)
+		public LoadBalancerWeightedPolling(IChannelFactory channelFactory)
 		{
 			ChannelFactory = channelFactory;
 		}

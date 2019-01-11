@@ -1,6 +1,6 @@
 ﻿using System;
 using Grpc.Core;
-using Grpc.Extension.Server.ServiceDiscovery;
+using Grpc.Extension.Core;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Grpc.Extension.Server
@@ -19,36 +19,7 @@ namespace Grpc.Extension.Server
 			return configure;
 		}
 
-		//public static GrpcServerConfiguration AddConsul(this GrpcServerConfiguration configure, Action<ConsulClientConfiguration> clientBuilder, Action<ConsulAgentServiceConfiguration> serviceBuilder)
-		//{
-		//	var agent = new ConsulAgentServiceConfiguration();
-		//	serviceBuilder?.Invoke(agent);
-		//	configure.ServiceDiscoveryServiceConfiguration = new AgentServiceRegistration
-		//	{
-		//		Address = agent.Address,
-		//		Port = agent.Port,
-		//		ID = string.IsNullOrWhiteSpace(agent.ServiceId) ? $"{agent.Address}:{agent.Port}" : agent.ServiceId,
-		//		Name = string.IsNullOrWhiteSpace(agent.ServiceName) ? $"{agent.Address}:{agent.Port}" : agent.ServiceName,
-		//		EnableTagOverride = agent.EnableTagOverride,
-		//		Meta = agent.Meta,
-		//		Tags = agent.Tags
-		//	};
-		//	if (agent.HealthCheckInterval.Ticks > 0)
-		//	{
-		//		configure.ServiceDiscoveryServiceConfiguration.Check = new AgentServiceCheck
-		//		{
-		//			DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(10),
-		//			Interval = agent.HealthCheckInterval,
-		//			Timeout = TimeSpan.FromSeconds(3),
-		//			GRPC = $"{agent.Address}:{agent.Port}"
-		//		};
-		//	}
 
-		//	var client = new ConsulClientConfiguration();
-		//	clientBuilder?.Invoke(client);
-		//	configure.ServiceDiscoveryClientConfiguration = client;
-		//	return configure;
-		//}
 
 
 		public static GrpcServerConfiguration AddServiceDiscovery<TDiscovery>(this GrpcServerConfiguration grpcClientConfiguration, IClientConfiguration clientConfiguration, IServiceConfiguration serviceConfiguration, int? weight = default) where TDiscovery : IServiceDiscovery
@@ -63,6 +34,13 @@ namespace Grpc.Extension.Server
 			grpcClientConfiguration.DiscoveryClientConfiguration = clientConfiguration;
 			grpcClientConfiguration.DiscoveryServiceConfiguration = serviceConfiguration;
 			return grpcClientConfiguration;
+		}
+
+		public static GrpcServerConfiguration AddConsulServiceDiscovery(
+			this GrpcServerConfiguration grpcClientConfiguration, ConsulConfiguration clientConfiguration,
+			ConsulServiceConfiguration serviceConfiguration, int? weight = default)
+		{
+			return grpcClientConfiguration.AddServiceDiscovery<ConsulServiceDiscovery>(clientConfiguration, serviceConfiguration, weight);
 		}
 	}
 }

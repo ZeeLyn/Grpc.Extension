@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Consul;
 
-namespace Grpc.Extension.Server.ServiceDiscovery
+namespace Grpc.Extension.Core
 {
 	public interface IClientConfiguration
 	{

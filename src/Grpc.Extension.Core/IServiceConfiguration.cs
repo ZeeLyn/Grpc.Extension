@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Grpc.Extension.Server.ServiceDiscovery
+namespace Grpc.Extension.Core
 {
 	public interface IServiceConfiguration
 	{
@@ -9,10 +9,6 @@ namespace Grpc.Extension.Server.ServiceDiscovery
 
 	public class ConsulServiceConfiguration : IServiceConfiguration
 	{
-		public string Address { get; set; }
-
-		public int Port { get; set; }
-
 		public string ServiceId { get; set; }
 
 		public string ServiceName { get; set; }

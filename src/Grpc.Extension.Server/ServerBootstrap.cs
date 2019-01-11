@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Linq;
-using System.Threading;
-using Grpc.Core;
 using Grpc.Core.Interceptors;
-using Grpc.Extension.Server.ServiceDiscovery;
+using Grpc.Extension.Core;
 using MagicOnion.Server;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Grpc.Extension.Server
 {
-	public class ServerBootstrap : IDisposable
+	internal class ServerBootstrap : IServerBootstrap
 	{
 
 		private ILogger Logger { get; }
@@ -32,38 +29,25 @@ namespace Grpc.Extension.Server
 				var discovery = app.ApplicationServices.GetService<IServiceDiscovery>();
 				Logger.LogInformation("---------------> Grpc server is starting...");
 
-				var services = MagicOnionEngine.BuildServerServiceDefinition(true);
-				var server = new Core.Server
+				var server = new Grpc.Core.Server
 				{
 					Ports = { configure.ServerPort },
-					Services = { services.ServerServiceDefinition.Intercept(new DependencyInjectionInterceptor(app.ApplicationServices)) }
+					Services = { MagicOnionEngine.BuildServerServiceDefinition(true).ServerServiceDefinition.Intercept(new DependencyInjectionInterceptor(app.ApplicationServices)) }
 				};
 
-				//Register grpc service
-				//foreach (var service in configure.Services)
-				//{
-				//	var bindMethod = service.Key.BaseType?.DeclaringType?.GetMethods().FirstOrDefault(p =>
-				//		p.Name == "BindService" && p.ReturnType == typeof(ServerServiceDefinition) && p.IsPublic);
-				//	if (bindMethod == null)
-				//		throw new InvalidOperationException($"Type {service.Key.Name} is not a grpc service");
-				//	var serviceInstance = Activator.CreateInstance(service.Key);
-				//	var binder = bindMethod.Invoke(null, new[] { serviceInstance }) as ServerServiceDefinition;
-				//	var interceptors = service.Value.Select(p => (Interceptor)Activator.CreateInstance(p)).ToArray();
-				//	server.Services.Add(binder.Intercept(new DependencyInjectionInterceptor(app.ApplicationServices))
-				//		.Intercept(interceptors));
-				//}
 
 				//Register health check service
-				//server.Services.Add(Health.V1.Health.BindService(app.ApplicationServices.GetService<HealthCheckService.HealthCheckService>()));
-
-
+				server.Services.Add(Health.V1.Health.BindService(app.ApplicationServices.GetService<HealthCheckService.HealthCheckService>()));
 
 				//Stop service
 				applicationLifetime.ApplicationStopping.Register(async () =>
-			   {
-				   await discovery.DeregisterAsync(configure.DiscoveryClientConfiguration, configure.DiscoveryServiceConfiguration);
-				   await server.ShutdownAsync();
-			   });
+				{
+					OnStopping();
+					await discovery.DeregisterAsync(configure.DiscoveryClientConfiguration, configure.DiscoveryServiceConfiguration, configure.ServerPort);
+					await server.ShutdownAsync();
+					OnStopped();
+
+				});
 
 				server.Start();
 
@@ -73,7 +57,7 @@ namespace Grpc.Extension.Server
 				{
 					Logger.LogInformation("---------------> Start registering consul service...");
 
-					discovery.RegisterAsync(configure.DiscoveryClientConfiguration, configure.DiscoveryServiceConfiguration, configure.Weight).GetAwaiter().GetResult();
+					discovery.RegisterAsync(configure.DiscoveryClientConfiguration, configure.DiscoveryServiceConfiguration, configure.ServerPort, configure.Weight).GetAwaiter().GetResult();
 				}
 			}
 			catch (Exception ex)
@@ -83,8 +67,14 @@ namespace Grpc.Extension.Server
 			}
 		}
 
-		public void Dispose()
+		public void OnStopping()
 		{
+
+		}
+
+		public void OnStopped()
+		{
+
 		}
 	}
 }

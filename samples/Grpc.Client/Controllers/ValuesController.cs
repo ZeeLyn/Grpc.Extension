@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Extension.Client;
 using Grpc.ServiceInterface;
+using MagicOnion;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Grpc.Client.Controllers
@@ -14,14 +15,13 @@ namespace Grpc.Client.Controllers
 	public class ValuesController : ControllerBase
 	{
 
-		private ClientFactory ClientFactory { get; }
+		private IClientFactory ClientFactory { get; }
 
-		private GrpcService GrpcService { get; }
 
-		public ValuesController(ClientFactory clientFactory, GrpcService grpcService)
+
+		public ValuesController(IClientFactory clientFactory)
 		{
 			ClientFactory = clientFactory;
-			GrpcService = grpcService;
 		}
 
 		// GET api/values
@@ -33,7 +33,8 @@ namespace Grpc.Client.Controllers
 			//GrpcService.Client<Hello.HelloClient, HelloReply>("", c => { return c.SayHello(new HelloRequest()); });
 			//ClientFactory.Get<Hello.HelloClient>("grpc-server").Invok();
 			var client = ClientFactory.Get<IHelloService>("grpc-server");
-			return Ok(await client.Say("owen"));
+			var r = await client.Say("owen");
+			return Ok(r);
 		}
 
 		// GET api/values/5

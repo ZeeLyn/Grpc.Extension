@@ -8,4 +8,8 @@
     <PackageReference Include="MagicOnion" Version="2.0.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Grpc.Extension.Client\Grpc.Extension.Client.csproj" />
+  </ItemGroup>
+
 </Project>

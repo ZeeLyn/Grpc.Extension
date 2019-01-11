@@ -19,8 +19,8 @@ namespace Grpc.Server.WebApp
 
 		public async UnaryResult<string> Say(string name)
 		{
-
-			return "hello " + name;
+			//await Task.Delay(10000);
+			return "Hello " + name;
 		}
 	}
 }

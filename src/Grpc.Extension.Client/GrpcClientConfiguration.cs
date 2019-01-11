@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using Consul;
 using Grpc.Core;
 using Grpc.Extension.Client.LoadBalancer;
+using Grpc.Extension.Core;
+using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.CircuitBreaker;
 
@@ -11,16 +12,15 @@ namespace Grpc.Extension.Client
 {
 	public class GrpcClientConfiguration
 	{
+		internal IServiceCollection ServiceCollection { get; set; }
 		public TimeSpan ChannelStatusCheckInterval { get; set; } = TimeSpan.FromSeconds(15);
 
 		internal Type GrpcLoadBalance { get; set; } = ILoadBalancer.Polling;
 
-		internal ConsulClientConfiguration ConsulClientConfiguration { get; set; }
+		internal IClientConfiguration ConsulClientConfiguration { get; set; }
 
 		internal Dictionary<string, ChannelCredentials> ServicesCredentials { get; set; } =
 			new Dictionary<string, ChannelCredentials>();
-
-		internal List<Type> ClientTypes { get; set; } = new List<Type>();
 
 		internal CircuitBreakerOption CircuitBreakerOption { get; set; }
 	}

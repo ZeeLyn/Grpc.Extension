@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Grpc.Extension.Client.CircuitBreaker;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +10,7 @@ namespace Grpc.Extension.Client
 	public static class ApplicationBuilderExtension
 	{
 		private static CancellationTokenSource CancellationTokenSource { get; }
+
 
 		static ApplicationBuilderExtension()
 		{
@@ -22,14 +24,16 @@ namespace Grpc.Extension.Client
 
 			var configure = app.ApplicationServices.GetService<GrpcClientConfiguration>();
 
-			var channelFactory = app.ApplicationServices.GetService<ChannelFactory>();
+			var channelFactory = app.ApplicationServices.GetService<IChannelFactory>();
+
+			var serviceBreakerBuilder = app.ApplicationServices.GetService<CircuitBreakerServiceBuilder>();
 
 			applicationLifetime.ApplicationStopping.Register(() =>
 			{
 				CancellationTokenSource.Cancel();
 			});
 
-
+			serviceBreakerBuilder.InitializeService();
 
 			Task.Factory.StartNew(async () =>
 			{
@@ -38,6 +42,7 @@ namespace Grpc.Extension.Client
 					await channelFactory.RefreshChannels(CancellationTokenSource.Token);
 					await Task.Delay(configure.ChannelStatusCheckInterval, CancellationTokenSource.Token);
 				}
+
 			}, CancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
 			return app;

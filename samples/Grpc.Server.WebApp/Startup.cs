@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
+using Grpc.Extension.Core;
 using Grpc.Extension.Server;
-using Grpc.Extension.Server.ServiceDiscovery;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -33,12 +33,10 @@ namespace Grpc.Server.WebApp
 			{
 				configure.AddServerPort(Configuration.GetSection("GrpcServer:Host").Get<string>(),
 					Configuration.GetSection("GrpcServer:Port").Get<int>(), ServerCredentials.Insecure);
-				configure.AddServiceDiscovery<ConsulServiceDiscovery>(
+				configure.AddConsulServiceDiscovery(
 					new ConsulConfiguration("http://192.168.1.142:8500"),
 					new ConsulServiceConfiguration
 					{
-						Address = Configuration.GetSection("GrpcServer:Host").Get<string>(),
-						Port = Configuration.GetSection("GrpcServer:Port").Get<int>(),
 						ServiceName = "grpc-server",
 						HealthCheckInterval = TimeSpan.FromSeconds(10)
 					}, Configuration.GetSection("GrpcServer:Weight").Get<int>());

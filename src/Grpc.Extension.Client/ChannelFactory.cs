@@ -3,26 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Consul;
 using Grpc.Core;
+using Grpc.Extension.Core;
 using Microsoft.Extensions.Logging;
 
 namespace Grpc.Extension.Client
 {
-	public class ChannelFactory
+	internal class ChannelFactory : IChannelFactory
 	{
 		private Dictionary<string, List<ChannelNode>> ServiceChannels { get; }
 
 		private GrpcClientConfiguration GrpcClientConfiguration { get; }
 
+		private IServiceDiscovery ServiceDiscovery { get; }
+
 		private readonly AsyncLock _asyncLock = new AsyncLock();
 
 		private ILogger Logger { get; }
 
-		public ChannelFactory(GrpcClientConfiguration gRpcClientConfiguration, ILogger<ChannelFactory> logger)
+		public ChannelFactory(GrpcClientConfiguration gRpcClientConfiguration, IServiceDiscovery serviceDiscovery, ILogger<ChannelFactory> logger)
 		{
 			ServiceChannels = new Dictionary<string, List<ChannelNode>>();
 			GrpcClientConfiguration = gRpcClientConfiguration;
+			ServiceDiscovery = serviceDiscovery;
 			Logger = logger;
 		}
 
@@ -38,7 +41,7 @@ namespace Grpc.Extension.Client
 		}
 
 
-		internal async Task RefreshChannels(CancellationToken cancellationToken)
+		public async Task RefreshChannels(CancellationToken cancellationToken)
 		{
 			Logger.LogInformation("Start refresh channel");
 			try
@@ -52,7 +55,7 @@ namespace Grpc.Extension.Client
 						if (cancellationToken.IsCancellationRequested)
 							break;
 
-						var healthEndPoints = await GetHealthService(service.Key, cancellationToken: cancellationToken);
+						var healthEndPoints = await ServiceDiscovery.GetServices(GrpcClientConfiguration.ConsulClientConfiguration, service.Key, "", true, cancellationToken: cancellationToken);
 
 						if (cancellationToken.IsCancellationRequested)
 							break;
@@ -115,35 +118,6 @@ namespace Grpc.Extension.Client
 			catch (Exception e)
 			{
 				Logger.LogError(e, "Refresh channel error:{0}", e.Message);
-			}
-		}
-
-
-		internal async Task<List<ServiceEntry>> GetHealthService(string serviceName, string tag = "", bool passingOnly = true, CancellationToken cancellationToken = default(CancellationToken))
-		{
-			using (var consul = new ConsulClient(conf =>
-			{
-				conf.Address = GrpcClientConfiguration.ConsulClientConfiguration.Address;
-				conf.Datacenter = GrpcClientConfiguration.ConsulClientConfiguration.Datacenter;
-				conf.Token = GrpcClientConfiguration.ConsulClientConfiguration.Token;
-				conf.WaitTime = GrpcClientConfiguration.ConsulClientConfiguration.WaitTime;
-			}))
-			{
-				try
-				{
-					var result = await consul.Health.Service(serviceName, tag, passingOnly, cancellationToken);
-					if (result.StatusCode != System.Net.HttpStatusCode.OK)
-					{
-						Logger.LogError("Get the health service error:{0}", result.StatusCode);
-					}
-
-					return result.Response.ToList();
-				}
-				catch (Exception ex)
-				{
-					Logger.LogError("Get the health service error:{0}\n{1}", ex.Message, ex.StackTrace);
-					throw;
-				}
 			}
 		}
 	}

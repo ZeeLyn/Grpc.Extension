@@ -1,5 +1,5 @@
 ﻿using Grpc.Core;
-using Grpc.Extension.Server.ServiceDiscovery;
+using Grpc.Extension.Core;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Grpc.Extension.Server
