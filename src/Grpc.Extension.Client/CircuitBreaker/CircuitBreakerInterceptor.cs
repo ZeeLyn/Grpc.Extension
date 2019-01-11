@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
+using Grpc.Extension.Core;
 
 namespace Grpc.Extension.Client.CircuitBreaker
 {
@@ -30,23 +31,26 @@ namespace Grpc.Extension.Client.CircuitBreaker
 
 		public override AsyncUnaryCall<TResponse> AsyncUnaryCall<TRequest, TResponse>(TRequest request, ClientInterceptorContext<TRequest, TResponse> context, AsyncUnaryCallContinuation<TRequest, TResponse> continuation)
 		{
-			if (CircuitBreakerOption != null)
+			if (IsEnableCircuitBreaker(context.Method.FullName))
 			{
-				var attr = CircuitBreakerServiceBuilder.GetAttribute<CircuitBreakerAttribute>(ServiceType,
-					context.Method.FullName);
 				var policy =
 					CircuitBreakerPolicy.GetOrCreatePolicyForAsyncInvoker<TResponse>(
 						$"{context.Host}:{context.Method.FullName}");
-				var r = policy.Execute(() =>
+				return policy.Execute(() =>
 				{
 					var task = base.AsyncUnaryCall(request, context, continuation);
 					task.GetAwaiter().GetResult();
 					return task;
 				});
-				return r;
 			}
 
 			return base.AsyncUnaryCall(request, context, continuation);
+		}
+
+		private bool IsEnableCircuitBreaker(string serviceName)
+		{
+			var attr = CircuitBreakerServiceBuilder.GetAttribute<NonCircuitBreakerAttribute>(ServiceType, serviceName);
+			return CircuitBreakerOption != null && attr == null;
 		}
 	}
 }

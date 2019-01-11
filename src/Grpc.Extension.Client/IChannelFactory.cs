@@ -8,6 +8,6 @@ namespace Grpc.Extension.Client
 	{
 		List<ChannelNode> GetChannelNodes(string serviceName, ChannelNodeStatus status = ChannelNodeStatus.Passing);
 
-		Task RefreshChannels(CancellationToken cancellationToken);
+		Task RefreshChannelsStatus(CancellationToken cancellationToken);
 	}
 }

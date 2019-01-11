@@ -69,12 +69,12 @@ namespace Grpc.Extension.Server
 
 		public void OnStopping()
 		{
-
+			Logger.LogInformation("--------------->  Server is stopping....");
 		}
 
 		public void OnStopped()
 		{
-
+			Logger.LogInformation("--------------->  Server is stopped");
 		}
 	}
 }

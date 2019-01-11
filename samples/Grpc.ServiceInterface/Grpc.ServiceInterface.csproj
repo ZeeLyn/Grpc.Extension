@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Grpc.Extension.Client\Grpc.Extension.Client.csproj" />
+    <ProjectReference Include="..\..\src\Grpc.Extension.Core\Grpc.Extension.Core.csproj" />
   </ItemGroup>
 
 </Project>

@@ -41,7 +41,7 @@ namespace Grpc.Extension.Client
 		}
 
 
-		public async Task RefreshChannels(CancellationToken cancellationToken)
+		public async Task RefreshChannelsStatus(CancellationToken cancellationToken)
 		{
 			Logger.LogInformation("Start refresh channel");
 			try

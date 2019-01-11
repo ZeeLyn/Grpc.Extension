@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Grpc.Extension.Client;
+using Grpc.Extension.Core;
 using MagicOnion;
 
 namespace Grpc.ServiceInterface
 {
 	public interface IHelloService : IService<IHelloService>
 	{
-		[CircuitBreaker]
+		[NonCircuitBreaker]
 		UnaryResult<string> Say(string name);
 	}
 }

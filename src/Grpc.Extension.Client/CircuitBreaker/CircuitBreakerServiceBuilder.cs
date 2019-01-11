@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Grpc.Extension.Core;
 using MagicOnion;
 using Microsoft.Extensions.DependencyModel;
 
@@ -24,7 +24,7 @@ namespace Grpc.Extension.Client.CircuitBreaker
 				ServiceAttributes[type] = new Dictionary<string, List<Attribute>>();
 				foreach (var method in type.GetMethods().Where(p => p.IsPublic))
 				{
-					ServiceAttributes[type][$"/{type.Name}/{method.Name}"] = method.GetCustomAttributes().ToList();
+					ServiceAttributes[type][$"/{type.Name}/{method.Name}"] = method.GetCustomAttributes().Where(p => p.GetType() == typeof(NonCircuitBreakerAttribute) || p.GetType() == typeof(CircuitBreakerAttribute)).ToList();
 				}
 			}
 		}

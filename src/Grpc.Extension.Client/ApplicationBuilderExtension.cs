@@ -39,7 +39,7 @@ namespace Grpc.Extension.Client
 			{
 				while (!CancellationTokenSource.Token.IsCancellationRequested)
 				{
-					await channelFactory.RefreshChannels(CancellationTokenSource.Token);
+					await channelFactory.RefreshChannelsStatus(CancellationTokenSource.Token);
 					await Task.Delay(configure.ChannelStatusCheckInterval, CancellationTokenSource.Token);
 				}
 
