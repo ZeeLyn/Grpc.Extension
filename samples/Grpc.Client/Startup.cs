@@ -35,7 +35,7 @@ namespace Grpc.Client
 				options.AddConsulServiceDiscovery(client => { client.Address = new Uri("http://192.168.1.142:8500"); });
 				options.AddServiceCredentials("grpc-server", ChannelCredentials.Insecure);
 				options.ChannelStatusCheckInterval = TimeSpan.FromSeconds(15);
-				//options.AddCircuitBreaker(conf => { conf.InvokeTimeout = TimeSpan.FromSeconds(1); });
+				options.AddCircuitBreaker(conf => { conf.InvokeTimeout = TimeSpan.FromSeconds(1); });
 			});
 		}
 

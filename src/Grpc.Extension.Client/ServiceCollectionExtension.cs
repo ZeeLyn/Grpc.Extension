@@ -14,6 +14,7 @@ namespace Grpc.Extension.Client
 			serviceCollection.AddSingleton<IClientFactory, ClientFactory>();
 			serviceCollection.AddSingleton<CircuitBreakerServiceBuilder>();
 			serviceCollection.AddSingleton<CircuitBreakerPolicy>();
+			serviceCollection.AddSingleton<IServiceInjectionCommand, ServiceInjectionCommand>();
 			configuration?.Invoke(conf);
 			serviceCollection.AddSingleton(conf);
 			if (conf.GrpcLoadBalance != null)

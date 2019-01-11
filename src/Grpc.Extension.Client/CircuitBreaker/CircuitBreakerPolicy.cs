@@ -3,8 +3,11 @@ using Polly;
 using Polly.CircuitBreaker;
 using Polly.Timeout;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
+using Grpc.Extension.Core;
+using MagicOnion;
 
 namespace Grpc.Extension.Client.CircuitBreaker
 {
@@ -14,9 +17,15 @@ namespace Grpc.Extension.Client.CircuitBreaker
 
 		private CircuitBreakerOption CircuitBreakerOption { get; }
 
-		public CircuitBreakerPolicy(GrpcClientConfiguration grpcClientConfiguration)
+		private CircuitBreakerServiceBuilder CircuitBreakerServiceBuilder { get; }
+
+		private IServiceInjectionCommand ServiceInjectionCommand { get; }
+
+		public CircuitBreakerPolicy(GrpcClientConfiguration grpcClientConfiguration, CircuitBreakerServiceBuilder circuitBreakerServiceBuilder, IServiceInjectionCommand serviceInjectionCommand)
 		{
 			CircuitBreakerOption = grpcClientConfiguration.CircuitBreakerOption;
+			CircuitBreakerServiceBuilder = circuitBreakerServiceBuilder;
+			ServiceInjectionCommand = serviceInjectionCommand;
 		}
 
 		public Policy<TResponse> GetOrCreatePolicyForSyncInvoker<TResponse>(string key)
@@ -62,20 +71,26 @@ namespace Grpc.Extension.Client.CircuitBreaker
 			//});
 		}
 
-		public Policy<AsyncUnaryCall<TResponse>> GetOrCreatePolicyForAsyncInvoker<TResponse>(string key)
+		public Policy<AsyncUnaryCall<TResponse>> GetOrCreatePolicyForAsyncInvoker<TResponse>(Type serviceType, string key)
 		{
 			if (CircuitBreakerOption == null)
 				throw new InvalidOperationException("");
 			return (Policy<AsyncUnaryCall<TResponse>>)Policies.GetOrAdd(key, k =>
 			{
+				var attr = CircuitBreakerServiceBuilder.GetAttribute<CircuitBreakerAttribute>(serviceType, key);
+
 				Policy<AsyncUnaryCall<TResponse>> policy = Policy<AsyncUnaryCall<TResponse>>
 					.Handle<BrokenCircuitException>()
 					.Or<TimeoutRejectedException>().Or<Exception>().Fallback(() =>
 					{
 						Console.WriteLine("timeout...........");
 						//return default(AsyncUnaryCall<TResponse>);
+						var command = ServiceInjectionCommand.GetCommand(serviceType, key);
 						return new AsyncUnaryCall<TResponse>(
-							Task.Run(() => { return (TResponse)Activator.CreateInstance(typeof(TResponse)); }),
+							Task.Run(() =>
+							{
+								return (TResponse)ServiceInjectionCommand.Run(command.Command, command.Namespace.ToArray()).GetAwaiter().GetResult();
+							}),
 							Task.Run(() => { return new Metadata(); }), () => new Status(StatusCode.OK, "123"),
 							() => new Metadata(), () => { });
 					});

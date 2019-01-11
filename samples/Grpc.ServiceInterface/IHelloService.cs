@@ -1,13 +1,11 @@
-﻿using System;
-using System.Threading.Tasks;
-using Grpc.Extension.Core;
+﻿using Grpc.Extension.Core;
 using MagicOnion;
 
 namespace Grpc.ServiceInterface
 {
 	public interface IHelloService : IService<IHelloService>
 	{
-		[NonCircuitBreaker]
+		[CircuitBreaker(InjectionNamespace = new[] { "" }, FallbackInjection = "return \"失败1\";")]
 		UnaryResult<string> Say(string name);
 	}
 }

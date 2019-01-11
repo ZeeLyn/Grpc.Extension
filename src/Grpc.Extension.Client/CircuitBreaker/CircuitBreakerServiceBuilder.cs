@@ -24,7 +24,16 @@ namespace Grpc.Extension.Client.CircuitBreaker
 				ServiceAttributes[type] = new Dictionary<string, List<Attribute>>();
 				foreach (var method in type.GetMethods().Where(p => p.IsPublic))
 				{
-					ServiceAttributes[type][$"/{type.Name}/{method.Name}"] = method.GetCustomAttributes().Where(p => p.GetType() == typeof(NonCircuitBreakerAttribute) || p.GetType() == typeof(CircuitBreakerAttribute)).ToList();
+					var attrs = method.GetCustomAttributes().Where(p =>
+						p.GetType() == typeof(NonCircuitBreakerAttribute) ||
+						p.GetType() == typeof(CircuitBreakerAttribute)).ToList();
+					if (attrs.All(p => p.GetType() != typeof(NonCircuitBreakerAttribute)) &&
+						attrs.All(p => p.GetType() != typeof(CircuitBreakerAttribute)))
+					{
+						throw new InvalidOperationException($"With circuit breaker enabled, service {type.FullName}.{method.Name} must add the CircuitBreakerAttribute custom attribute. If you need to disable the circuit breaker, you can add the NonCircuitBreakerAttribute custom attribute.");
+					}
+
+					ServiceAttributes[type][$"/{type.Name}/{method.Name}"] = attrs;
 				}
 			}
 		}

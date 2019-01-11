@@ -33,7 +33,8 @@ namespace Grpc.Extension.Client
 				CancellationTokenSource.Cancel();
 			});
 
-			serviceBreakerBuilder.InitializeService();
+			if (configure.CircuitBreakerOption != null)
+				serviceBreakerBuilder.InitializeService();
 
 			Task.Factory.StartNew(async () =>
 			{

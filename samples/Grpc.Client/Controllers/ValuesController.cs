@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Extension.Client;
+using Grpc.Extension.Client.CircuitBreaker;
 using Grpc.ServiceInterface;
 using MagicOnion;
 using Microsoft.AspNetCore.Mvc;
@@ -17,11 +18,12 @@ namespace Grpc.Client.Controllers
 
 		private IClientFactory ClientFactory { get; }
 
+		private IServiceInjectionCommand ServiceInjectionCommand { get; }
 
-
-		public ValuesController(IClientFactory clientFactory)
+		public ValuesController(IClientFactory clientFactory, IServiceInjectionCommand serviceInjectionCommand)
 		{
 			ClientFactory = clientFactory;
+			ServiceInjectionCommand = serviceInjectionCommand;
 		}
 
 		// GET api/values
@@ -34,7 +36,11 @@ namespace Grpc.Client.Controllers
 			//ClientFactory.Get<Hello.HelloClient>("grpc-server").Invok();
 			var client = ClientFactory.Get<IHelloService>("grpc-server");
 			var r = await client.Say("owen");
-			return Ok(r);
+			return Ok(new
+			{
+				Result = r,
+				Command = await ServiceInjectionCommand.Run("return new{result=1};")
+			});
 		}
 
 		// GET api/values/5

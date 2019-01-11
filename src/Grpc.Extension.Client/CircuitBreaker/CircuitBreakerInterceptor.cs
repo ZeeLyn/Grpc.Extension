@@ -34,8 +34,7 @@ namespace Grpc.Extension.Client.CircuitBreaker
 			if (IsEnableCircuitBreaker(context.Method.FullName))
 			{
 				var policy =
-					CircuitBreakerPolicy.GetOrCreatePolicyForAsyncInvoker<TResponse>(
-						$"{context.Host}:{context.Method.FullName}");
+					CircuitBreakerPolicy.GetOrCreatePolicyForAsyncInvoker<TResponse>(ServiceType, $"{context.Method.FullName}");
 				return policy.Execute(() =>
 				{
 					var task = base.AsyncUnaryCall(request, context, continuation);

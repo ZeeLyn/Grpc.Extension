@@ -13,6 +13,7 @@ namespace Grpc.Extension.Server
 			serviceCollection.AddSingleton(conf);
 			serviceCollection.AddSingleton<IServerBootstrap, ServerBootstrap>();
 			serviceCollection.AddScoped<ServiceProviderMetadataEntry>();
+			serviceCollection.AddSingleton<HealthCheckService.HealthCheckService>();
 			return serviceCollection;
 		}
 	}
