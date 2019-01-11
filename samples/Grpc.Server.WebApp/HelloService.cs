@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Grpc.Core;
 using Grpc.Extension.Server;
 using Grpc.ServiceInterface;
@@ -19,6 +20,7 @@ namespace Grpc.Server.WebApp
 
 		public async UnaryResult<string> Say(string name)
 		{
+			throw new Exception("error");
 			await Task.Delay(3000);
 			return "Hello " + name;
 		}

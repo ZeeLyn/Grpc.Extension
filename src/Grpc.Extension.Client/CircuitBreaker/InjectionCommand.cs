@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Grpc.Extension.Client.CircuitBreaker
 {
@@ -8,6 +6,6 @@ namespace Grpc.Extension.Client.CircuitBreaker
 	{
 		public string Command { get; set; }
 
-		public IEnumerable<string> Namespace { get; set; }
+		public string[] Namespace { get; set; }
 	}
 }

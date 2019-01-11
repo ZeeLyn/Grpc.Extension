@@ -71,53 +71,34 @@ namespace Grpc.Extension.Client.CircuitBreaker
 			//});
 		}
 
-		public Policy<AsyncUnaryCall<TResponse>> GetOrCreatePolicyForAsyncInvoker<TResponse>(Type serviceType, string key)
+		public Policy<AsyncUnaryCall<TResponse>> GetOrCreatePolicyForAsyncUnaryCall<TResponse>(Type serviceType, string key)
 		{
 			if (CircuitBreakerOption == null)
 				throw new InvalidOperationException("");
 			return (Policy<AsyncUnaryCall<TResponse>>)Policies.GetOrAdd(key, k =>
 			{
-				var attr = CircuitBreakerServiceBuilder.GetAttribute<CircuitBreakerAttribute>(serviceType, key);
-
 				Policy<AsyncUnaryCall<TResponse>> policy = Policy<AsyncUnaryCall<TResponse>>
 					.Handle<BrokenCircuitException>()
-					.Or<TimeoutRejectedException>().Or<Exception>().Fallback(() =>
+					.Or<TimeoutRejectedException>().Or<Exception>().Fallback(cl =>
 					{
-						Console.WriteLine("timeout...........");
-						//return default(AsyncUnaryCall<TResponse>);
 						var command = ServiceInjectionCommand.GetCommand(serviceType, key);
 						return new AsyncUnaryCall<TResponse>(
-							Task.Run(() =>
-							{
-								return (TResponse)ServiceInjectionCommand.Run(command.Command, command.Namespace.ToArray()).GetAwaiter().GetResult();
-							}),
-							Task.Run(() => { return new Metadata(); }), () => new Status(StatusCode.OK, "123"),
+							Task.Run(() => (TResponse)ServiceInjectionCommand.Run(command.Command, command.Namespace).GetAwaiter().GetResult(), cl),
+							Task.Run(() => new Metadata(), cl), () => new Status(StatusCode.OK, ""),
 							() => new Metadata(), () => { });
 					});
-				//	.Fallback(
-				//(ex, ctx, ct) => {
-				//	CircuitBreakerOption.OnFallback?.Invoke(ex, ctx, ct);
-				//},
-				//(ex, ctx) => { CircuitBreakerOption.OnFallbackBefore?.Invoke(ex, ctx); });
-
-
 
 				if (CircuitBreakerOption.InvokeTimeout.Ticks > 0)
 				{
 					policy = policy.Wrap(Policy.Timeout(CircuitBreakerOption.InvokeTimeout, TimeoutStrategy.Pessimistic));
 				}
 
-
-				//if (CircuitBreakerOption.ExceptionsAllowedBeforeBreaking > 0)
-				//{
-				//	policy = policy.Wrap(Policy<AsyncUnaryCall<TResponse>>.Handle<TimeoutRejectedException>().Or<Exception>()
-				//		.CircuitBreaker(CircuitBreakerOption.ExceptionsAllowedBeforeBreaking,
-				//			CircuitBreakerOption.DurationOfBreak));
-				//	//.CircuitBreaker(
-				//	//CircuitBreakerOption.ExceptionsAllowedBeforeBreaking, CircuitBreakerOption.DurationOfBreak,
-				//	//(ex, ts, ctx) => { CircuitBreakerOption.OnBreak?.Invoke(ex, ts, ctx); },
-				//	//ctx => { CircuitBreakerOption.OnReset?.Invoke(ctx); }));
-				//}
+				if (CircuitBreakerOption.ExceptionsAllowedBeforeBreaking > 0)
+				{
+					policy = policy.Wrap(Policy<AsyncUnaryCall<TResponse>>.Handle<TimeoutRejectedException>().Or<Exception>()
+						.CircuitBreaker(CircuitBreakerOption.ExceptionsAllowedBeforeBreaking,
+							CircuitBreakerOption.DurationOfBreak));
+				}
 
 				return policy;
 			});

@@ -16,7 +16,11 @@ namespace Grpc.Extension.Client.CircuitBreaker
 		{
 			var ignoreAssemblyFix = new[]
 				{"Microsoft", "System", "Grpc.Core", "Consul", "MagicOnion", "Polly", "Newtonsoft.Json", "MessagePack","Google.Protobuf","Remotion.Linq","SOS.NETCore","WindowsBase","mscorlib","netstandard","Grpc.Extension.Client"};
-			var assemblies = DependencyContext.Default.RuntimeLibraries.SelectMany(i => i.GetDefaultAssemblyNames(DependencyContext.Default).Where(p => !ignoreAssemblyFix.Any(ignore => p.Name.StartsWith(ignore, StringComparison.CurrentCultureIgnoreCase))).Select(z => Assembly.Load(new AssemblyName(z.Name)))).Where(p => !p.IsDynamic).ToList();
+			var assemblies = DependencyContext.Default.RuntimeLibraries.SelectMany(i =>
+				i.GetDefaultAssemblyNames(DependencyContext.Default)
+					.Where(p => !ignoreAssemblyFix.Any(ignore =>
+						p.Name.StartsWith(ignore, StringComparison.CurrentCultureIgnoreCase)))
+					.Select(z => Assembly.Load(new AssemblyName(z.Name)))).Where(p => !p.IsDynamic).ToList();
 
 			var types = assemblies.SelectMany(p => p.GetExportedTypes().Where(type => type.IsInterface && typeof(IServiceMarker).IsAssignableFrom(type))).ToList();
 			foreach (var type in types)

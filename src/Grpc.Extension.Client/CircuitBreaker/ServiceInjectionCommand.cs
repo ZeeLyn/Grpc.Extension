@@ -14,33 +14,35 @@ namespace Grpc.Extension.Client.CircuitBreaker
 
 		private readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, InjectionCommand>> _serviceCommand =
 			new ConcurrentDictionary<Type, ConcurrentDictionary<string, InjectionCommand>>();
+
+		private readonly ConcurrentDictionary<string, object> scriptResult = new ConcurrentDictionary<string, object>();
 		public ServiceInjectionCommand(CircuitBreakerServiceBuilder circuitBreakerServiceBuilder)
 		{
 			CircuitBreakerServiceBuilder = circuitBreakerServiceBuilder;
 		}
 
-		private readonly ConcurrentDictionary<string, object> scripts = new ConcurrentDictionary<string, object>();
+
 		public InjectionCommand GetCommand(Type serviceType, string serviceName)
 		{
 			var attr = CircuitBreakerServiceBuilder.GetAttribute<CircuitBreakerAttribute>(serviceType, serviceName);
 			if (attr == null)
 				throw new InvalidOperationException();
 			var typeCommands = _serviceCommand.GetOrAdd(serviceType, new ConcurrentDictionary<string, InjectionCommand>());
-			return typeCommands.GetOrAdd(serviceName, new InjectionCommand { Command = attr.FallbackInjection, Namespace = attr.InjectionNamespace });
+			return typeCommands.GetOrAdd(serviceName, new InjectionCommand { Command = attr.FallbackInjectionScript, Namespace = attr.InjectionNamespace });
 		}
 
 		public async Task<object> Run(string command, params string[] injectionNamespaces)
 		{
-			if (!scripts.ContainsKey(command))
+			if (!scriptResult.ContainsKey(command))
 			{
 				var scriptOptions = ScriptOptions.Default.WithImports("System.Threading.Tasks");
 				if (injectionNamespaces != null && injectionNamespaces.Length > 0)
 				{
 					scriptOptions = scriptOptions.WithReferences(injectionNamespaces);
 				}
-				return scripts.GetOrAdd(command, LZ4MessagePackSerializer.Serialize(await CSharpScript.EvaluateAsync(command, scriptOptions)));
+				return scriptResult.GetOrAdd(command, LZ4MessagePackSerializer.Serialize(await CSharpScript.EvaluateAsync(command, scriptOptions)));
 			}
-			scripts.TryGetValue(command, out var result);
+			scriptResult.TryGetValue(command, out var result);
 			return result;
 
 		}
