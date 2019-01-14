@@ -20,7 +20,7 @@ namespace Grpc.Server.WebApp
 
 		public async UnaryResult<string> Say(string name)
 		{
-			throw new Exception("error");
+
 			await Task.Delay(3000);
 			return "Hello " + name;
 		}

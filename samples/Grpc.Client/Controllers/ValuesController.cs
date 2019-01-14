@@ -30,12 +30,11 @@ namespace Grpc.Client.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Get()
 		{
-			//var ch = new Channel("192.168.1.129", 50054, ChannelCredentials.Insecure);
-			//var client = new Hello.HelloClient(ch);
-			//GrpcService.Client<Hello.HelloClient, HelloReply>("", c => { return c.SayHello(new HelloRequest()); });
-			//ClientFactory.Get<Hello.HelloClient>("grpc-server").Invok();
-			var client = ClientFactory.Get<IHelloService>("grpc-server");
+			var client = ClientFactory.GetClient<IHelloService>("grpc-server");
 			var r = await client.Say("owen");
+
+			//var hub = ClientFactory.GetStreamingHubClient<IChatHub, IChatReceiver>("grpc-server", new HubRecevier());
+			//var rec = await hub.ReceiverAsync("你好");
 			return Ok(new
 			{
 				Result = r,

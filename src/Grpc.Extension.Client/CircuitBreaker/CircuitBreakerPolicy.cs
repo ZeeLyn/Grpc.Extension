@@ -28,47 +28,41 @@ namespace Grpc.Extension.Client.CircuitBreaker
 			ServiceInjectionCommand = serviceInjectionCommand;
 		}
 
-		public Policy<TResponse> GetOrCreatePolicyForSyncInvoker<TResponse>(string key)
+		public Policy<TResponse> GetOrCreatePolicyForUnaryCall<TResponse>(Type serviceType, string key)
 		{
 			if (CircuitBreakerOption == null)
 				throw new InvalidOperationException("");
-			//return Policies.GetOrAdd(key, k =>
-			//{
-
-
-			Policy<TResponse> policy = Policy<TResponse>.Handle<BrokenCircuitException>()
-			.Or<TimeoutRejectedException>().Fallback(() =>
+			return (Policy<TResponse>)Policies.GetOrAdd(key, k =>
 			{
-				Console.WriteLine("timeout...........");
-				return default(TResponse);
+				Policy<TResponse> policy = Policy<TResponse>
+					.Handle<BrokenCircuitException>()
+					.Or<TimeoutRejectedException>().Or<Exception>().Fallback(cl =>
+					{
+						var command = ServiceInjectionCommand.GetCommand(serviceType, key);
+						return (TResponse)ServiceInjectionCommand.Run(command.Command, command.Namespace).GetAwaiter()
+							.GetResult();
+					});
+
+				if (CircuitBreakerOption.InvokeTimeout.Ticks > 0)
+				{
+					policy = policy.Wrap(Policy.Timeout(CircuitBreakerOption.InvokeTimeout, TimeoutStrategy.Pessimistic));
+				}
+
+				//if (CircuitBreakerOption.Retry > 0)
+				//{
+				//	policy = policy.Wrap(Policy.Handle<BrokenCircuitException>()
+				//		.Or<TimeoutRejectedException>().Or<Exception>().Retry(CircuitBreakerOption.Retry));
+				//}
+
+				if (CircuitBreakerOption.ExceptionsAllowedBeforeBreaking > 0)
+				{
+					policy = policy.Wrap(Policy<TResponse>.Handle<TimeoutRejectedException>().Or<Exception>()
+						.CircuitBreaker(CircuitBreakerOption.ExceptionsAllowedBeforeBreaking,
+							CircuitBreakerOption.DurationOfBreak, (r, ts) => { Console.WriteLine("breaker------------------------"); }, () => { }));
+				}
+
+				return policy;
 			});
-			//	.Fallback(
-			//(ex, ctx, ct) => {
-			//	CircuitBreakerOption.OnFallback?.Invoke(ex, ctx, ct);
-			//},
-			//(ex, ctx) => { CircuitBreakerOption.OnFallbackBefore?.Invoke(ex, ctx); });
-
-
-
-			if (CircuitBreakerOption.InvokeTimeout.Ticks > 0)
-			{
-				policy = policy.Wrap(Policy.Timeout(CircuitBreakerOption.InvokeTimeout, TimeoutStrategy.Pessimistic));
-			}
-
-
-			if (CircuitBreakerOption.ExceptionsAllowedBeforeBreaking > 0)
-			{
-				policy = policy.Wrap(Policy<TResponse>.Handle<TimeoutRejectedException>().Or<Exception>()
-					.CircuitBreaker(CircuitBreakerOption.ExceptionsAllowedBeforeBreaking,
-						CircuitBreakerOption.DurationOfBreak));
-				//.CircuitBreaker(
-				//CircuitBreakerOption.ExceptionsAllowedBeforeBreaking, CircuitBreakerOption.DurationOfBreak,
-				//(ex, ts, ctx) => { CircuitBreakerOption.OnBreak?.Invoke(ex, ts, ctx); },
-				//ctx => { CircuitBreakerOption.OnReset?.Invoke(ctx); }));
-			}
-
-			return policy;
-			//});
 		}
 
 		public Policy<AsyncUnaryCall<TResponse>> GetOrCreatePolicyForAsyncUnaryCall<TResponse>(Type serviceType, string key)
@@ -102,6 +96,47 @@ namespace Grpc.Extension.Client.CircuitBreaker
 				if (CircuitBreakerOption.ExceptionsAllowedBeforeBreaking > 0)
 				{
 					policy = policy.Wrap(Policy<AsyncUnaryCall<TResponse>>.Handle<TimeoutRejectedException>().Or<Exception>()
+						.CircuitBreaker(CircuitBreakerOption.ExceptionsAllowedBeforeBreaking,
+							CircuitBreakerOption.DurationOfBreak, (r, ts) => { Console.WriteLine("breaker------------------------"); }, () => { }));
+				}
+
+				return policy;
+			});
+		}
+
+		public Policy<AsyncClientStreamingCall<TRequest, TResponse>> GetOrCreatePolicyForAsyncClientStreamingCall<TRequest, TResponse>(Type serviceType, string key)
+		{
+			if (CircuitBreakerOption == null)
+				throw new InvalidOperationException("");
+			return (Policy<AsyncClientStreamingCall<TRequest, TResponse>>)Policies.GetOrAdd(key, k =>
+			{
+				Policy<AsyncClientStreamingCall<TRequest, TResponse>> policy = Policy<AsyncClientStreamingCall<TRequest, TResponse>>
+					.Handle<BrokenCircuitException>()
+					.Or<TimeoutRejectedException>().Or<Exception>().Fallback(cl =>
+					{
+						//var command = ServiceInjectionCommand.GetCommand(serviceType, key);
+
+						return new AsyncClientStreamingCall<TRequest, TResponse>(null, null, null, null, null, null);
+						//return new AsyncUnaryCall<TResponse>(
+						//	Task.Run(() => (TResponse)ServiceInjectionCommand.Run(command.Command, command.Namespace).GetAwaiter().GetResult(), cl),
+						//	Task.Run(() => new Metadata(), cl), () => new Status(StatusCode.OK, ""),
+						//	() => new Metadata(), () => { });
+					});
+
+				if (CircuitBreakerOption.InvokeTimeout.Ticks > 0)
+				{
+					policy = policy.Wrap(Policy.Timeout(CircuitBreakerOption.InvokeTimeout, TimeoutStrategy.Pessimistic));
+				}
+
+				//if (CircuitBreakerOption.Retry > 0)
+				//{
+				//	policy = policy.Wrap(Policy.Handle<BrokenCircuitException>()
+				//		.Or<TimeoutRejectedException>().Or<Exception>().Retry(CircuitBreakerOption.Retry));
+				//}
+
+				if (CircuitBreakerOption.ExceptionsAllowedBeforeBreaking > 0)
+				{
+					policy = policy.Wrap(Policy<AsyncClientStreamingCall<TRequest, TResponse>>.Handle<TimeoutRejectedException>().Or<Exception>()
 						.CircuitBreaker(CircuitBreakerOption.ExceptionsAllowedBeforeBreaking,
 							CircuitBreakerOption.DurationOfBreak, (r, ts) => { Console.WriteLine("breaker------------------------"); }, () => { }));
 				}
